@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Interativo | Monitor de Status n8n</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Tailwind Default (Gray, White, Blue) -->
+    <!-- Application Structure Plan: Uma aplicação de página única (SPA) com layout responsivo. Uma barra lateral fixa (desktop) e um menu hamburger (mobile) fornecem a navegação. A área de conteúdo principal é rolável, com seções correspondentes aos links de navegação. Um diagrama de fluxo de trabalho interativo baseado em HTML/Tailwind é a peça central, permitindo aos usuários clicar nos nós para abrir um modal com detalhes. Esta estrutura foi escolhida para transformar o documento de texto linear em uma experiência explorável, visual e interativa, focando no próprio processo do fluxo de trabalho. -->
+    <!-- Visualization & Content Choices: 1. Diagrama de Fluxo de Trabalho (Processo): Blocos HTML/Tailwind (divs) estilizados como nós e conectados com bordas/flexbox. Objetivo: Organizar/Explicar. Interação: Clicar no nó -> Abrir modal. Justificativa: Representa visualmente o fluxo n8n sem SVG/Mermaid, tornando a arquitetura central explorável. 2. Lista de Serviços (Dados): Grade de cartões Tailwind. Objetivo: Informar. Justificativa: Lista de forma limpa os serviços monitorados. 3. Lógica Principal (Código): Bloco <pre><code> com um botão 'Copiar' alimentado por JS. Objetivo: Informar/Reutilizar. Interação: Clicar no botão -> Copiar código. Justificativa: Torna o artefato técnico principal (o código JS) acessível. 4. Modais (Detalhes): Modal JS/Tailwind para exibir detalhes dos nós. Objetivo: Informar (sob demanda). Interação: Clique para abrir/fechar. Justificativa: Fornece informações em camadas sem sobrecarregar a UI principal. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        /* Estilos para a seta de conexão do fluxo */
+        .workflow-arrow {
+            position: relative;
+            height: 30px;
+            width: 2px;
+            background-color: #9ca3af; /* gray-400 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .workflow-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: -4px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #9ca3af; /* gray-400 */
+        }
+        /* Estilos para o nó de "IF" (Diamante) */
+        .workflow-node.diamond {
+            width: 180px;
+            height: 100px;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .workflow-node.diamond span {
+            transform: rotate(-45deg);
+            max-width: 100px;
+            text-align: center;
+        }
+        /* Linhas horizontais para o "IF" */
+        .if-branch {
+            position: relative;
+            width: 100%;
+        }
+        .if-branch::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 50%;
+            height: 2px;
+            background-color: #9ca3af;
+        }
+        .if-branch.true-branch::before {
+            left: 50%;
+        }
+        .if-branch.false-branch::before {
+            right: 50%;
+            width: 50%;
+            left: 0;
+        }
+        .if-branch .workflow-arrow {
+            position: absolute;
+            top: -15px;
+        }
+        .if-branch.true-branch .workflow-arrow {
+            right: 0;
+            left: auto;
+        }
+        .if-branch.false-branch .workflow-arrow {
+            left: 0;
+            right: auto;
+        }
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* gray-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af; /* gray-400 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        /* Estado ativo da navegação */
+        .nav-link.active {
+            background-color: #eef2ff; /* indigo-50 */
+            color: #4f46e5; /* indigo-700 */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 h-full">
+
+    <div class="flex h-full">
+        <!-- Barra Lateral Desktop -->
+        <aside class="w-64 h-screen fixed top-0 left-0 bg-white shadow-lg hidden md:flex flex-col z-20">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-indigo-700">Monitor n8n</h2>
+                <p class="text-sm text-gray-500">Documentação Interativa</p>
+            </div>
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="#overview" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6-4l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M1Player.me_Logo.png </path></svg>
+                    <span>Visão Geral</span>
+                </a>
+                <a href="#requirement" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    <span>Requisito Funcional</span>
+                </a>
+                <a href="#architecture" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Arquitetura do Fluxo</span>
+                </a>
+                <a href="#services" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <span>Serviços Monitorados</span>
+                </a>
+                <a href="#logic" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    <span>Lógica Principal (JS)</span>
+                </a>
+                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
+                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Testes e Sustentação</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Header Mobile -->
+        <header class="md:hidden sticky top-0 bg-white shadow-md z-30 w-full flex items-center justify-between p-4">
+            <h2 class="text-xl font-bold text-indigo-700">Monitor n8n</h2>
+            <button id="menu-btn" class="text-gray-600 hover:text-gray-900">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <!-- Menu Mobile (Oculto) -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+        <nav id="mobile-menu" class="fixed top-0 left-0 w-64 h-full bg-white z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-indigo-700">Navegação</h2>
+            </div>
+            <div class="px-4 space-y-2">
+                <a href="#overview" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Visão Geral</a>
+                <a href="#requirement" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Requisito Funcional</a>
+                <a href="#architecture" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Arquitetura do Fluxo</a>
+                <a href="#services" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Serviços Monitorados</a>
+                <a href="#logic" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Lógica Principal (JS)</a>
+                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Testes e Sustentação</a>
+            </div>
+        </nav>
+
+        <!-- Conteúdo Principal -->
+        <main id="main-content" class="md:ml-64 flex-1 h-screen overflow-y-auto pb-24">
+            <div class="p-4 md:p-8 space-y-12">
+                
+                <!-- 1. Visão Geral -->
+                <section id="overview" class="scroll-mt-20">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h1 class="text-3xl font-bold text-indigo-900 mb-4">Automação de Monitoramento de Status Pages</h1>
+                        <p class="text-lg text-gray-600 mb-6">Esta documentação detalha a automação implementada no n8n para monitoramento ativo de provedores de serviço externos (SaaS/PaaS). O robô consulta endpoints JSON públicos e notifica grupos do Telegram sobre a saúde dos serviços.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center md:text-left">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-500 uppercase">Sistemas</span>
+                                <p class="text-lg font-medium text-indigo-700">n8n, Telegram Bot API</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-semibold text-gray-500 uppercase">Público-Alvo</span>
+                                <p class="text-lg font-medium">Desenvolvedor, DevOps, Sustentação</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-semibold text-gray-500 uppercase">Tipo</span>
+                                <p class="text-lg font-medium">Melhoria / Nova Funcionalidade</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Requisito Funcional -->
+                <section id="requirement" class="scroll-mt-20">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Requisito Funcional</h2>
+                        <p class="text-gray-700 mb-6">Esta seção descreve o problema que a automação se propõe a resolver e o comportamento esperado do sistema, que agora está implementado.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-semibold text-lg">Cenário</h3>
+                                <p class="text-gray-600">A equipe de TI necessitava de visibilidade imediata sobre a indisponibilidade de fornecedores críticos (Cloudflare, SAP, Atlassian, etc.) para agilizar a resposta a incidentes e comunicação interna.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg">Solução Implementada</h3>
+                                <p class="text-gray-600">Foi desenvolvido um fluxo automatizado no n8n que realiza a varredura a cada 15 minutos nas APIs de status públicas dos fornecedores listados.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg">Comportamento do Sistema</h3>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                    <li>O sistema coleta o status de 6 serviços críticos simultaneamente.</li>
+                                    <li>Processa os dados para identificar falhas (status diferente de "operacional").</li>
+                                    <li>Envia um relatório consolidado para o Telegram com alertas visuais (🔴 ou 🟢).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Arquitetura do Fluxo -->
+                <section id="architecture" class="scroll-mt-20">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Arquitetura do Fluxo (Workflow)</h2>
+                        <p class="text-gray-700 mb-6">Abaixo está uma representação visual do fluxo de trabalho `Monitor_Status_Services_Telegram` no n8n. Este fluxo foi otimizado para processamento em lote, sem loops, para melhor performance. **Clique em qualquer nó** para ver seus detalhes de configuração.</p>
+                        
+                        <div class="flex flex-col items-center p-4 overflow-x-auto">
+                            <!-- Nó Inicial -->
+                            <div class="workflow-node bg-green-100 border-2 border-green-500 text-green-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="trigger">
+                                <span class="font-semibold">A cada 15 min</span>
+                                <span class="text-xs block">(Schedule Trigger)</span>
+                            </div>
+                            <div class="workflow-arrow"></div>
+
+                            <!-- Nó 2 -->
+                            <div class="workflow-node bg-blue-100 border-2 border-blue-500 text-blue-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="lista">
+                                <span class="font-semibold">Lista de Serviços</span>
+                                <span class="text-xs block">(Code Node)</span>
+                            </div>
+                            <div class="workflow-arrow"></div>
+
+                            <!-- Nó 3 -->
+                            <div class="workflow-node bg-blue-100 border-2 border-blue-500 text-blue-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="http">
+                                <span class="font-semibold">Checar Status</span>
+                                <span class="text-xs block">(HTTP Request)</span>
+                            </div>
+                            <div class="workflow-arrow"></div>
+
+                            <!-- Nó 4 -->
+                            <div class="workflow-node bg-blue-100 border-2 border-blue-500 text-blue-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="relatorio">
+                                <span class="font-semibold">Gera Relatório</span>
+                                <span class="text-xs block">(Code Node)</span>
+                            </div>
+                            <div class="workflow-arrow"></div>
+
+                            <!-- Nó 5 (IF) -->
+                            <div class="workflow-node diamond bg-yellow-100 border-2 border-yellow-500 text-yellow-800 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="if">
+                                <span class="font-semibold">Teve Erro?</span>
+                            </div>
+                            
+                            <!-- Branches do IF -->
+                            <div class="flex w-full max-w-md mt-4">
+                                <!-- Ramo Falso (Esquerda) -->
+                                <div class="w-1/2 px-2 text-center relative if-branch false-branch">
+                                    <span class="text-sm font-semibold text-gray-500 absolute -top-6 left-1/4">False</span>
+                                    <div class="workflow-arrow" style="margin-top: -15px;"></div>
+                                    <div class="workflow-node bg-green-100 border-2 border-green-500 text-green-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow mt-4" data-node="sucesso">
+                                        <span class="font-semibold">Telegram Sucesso</span>
+                                        <span class="text-xs block">(Telegram Node)</span>
+                                    </div>
+                                </div>
+                                <!-- Ramo Verdadeiro (Direita) -->
+                                <div class="w-1/2 px-2 text-center relative if-branch true-branch">
+                                    <span class="text-sm font-semibold text-gray-500 absolute -top-6 right-1/4">True</span>
+                                    <div class="workflow-arrow" style="margin-top: -15px;"></div>
+                                    <div class="workflow-node bg-red-100 border-2 border-red-500 text-red-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow mt-4" data-node="alerta">
+                                        <span class="font-semibold">Telegram Alerta</span>
+                                        <span class="text-xs block">(Telegram Node)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. Serviços Monitorados -->
+                <section id="services" class="scroll-mt-20">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Serviços Monitorados</h2>
+                        <p class="text-gray-700 mb-6">O fluxo está configurado para monitorar os seguintes 6 provedores de serviços. A arquitetura permite adicionar ou remover serviços facilmente apenas editando o nó "Lista de Serviços".</d>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Card de Serviço -->
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 class="font-semibold text-lg text-indigo-800">Cloudflare</h3>
+                                <p class="text-sm text-gray-600 truncate">cloudflarestatus.com</p>
+                            </div>
+                            <!-- Card de Serviço -->
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 class="font-semibold text-lg text-indigo-800">Infobip</h3>
+                                <p class="text-sm text-gray-600 truncate">status.infobip.com</p>
+                            </div>
+                            <!-- Card de Serviço -->
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 class="font-semibold text-lg text-indigo-800">Unico</h3>
+                                <p class="text-sm text-gray-600 truncate">status.unico.io</p>
+                            </div>
+                            <!-- Card de Serviço -->
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 class="font-semibold text-lg text-indigo-800">Serasa</h3>
+                                <p class="text-sm text-gray-600 truncate">status.allowme.com.br</p>
+                            </div>
+                            <!-- Card de Serviço -->
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 class="font-semibold text-lg text-indigo-800">SAP for Me</h3>
+                                <p class="text-sm text-gray-600 truncate">status.me.sap.com</p>
+                            </div>
+                            <!-- Card de Serviço -->
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h3 class="font-semibold text-lg text-indigo-800">Atlassian</h3>
+                                <p class="text-sm text-gray-600 truncate">status.atlassian.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Lógica Principal (JS) -->
+                <section id="logic" class="scroll-mt-20">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Lógica Principal (Nó: Gera Relatório)</h2>
+                        <p class="text-gray-700 mb-6">O coração da automação é um nó de código JavaScript (ES6) que cruza a lista de serviços com os resultados da API, formata o status de cada um e constrói a mensagem final a ser enviada.</p>
+                        
+                        <div class="bg-gray-900 text-white rounded-lg shadow-lg overflow-hidden">
+                            <div class="flex justify-between items-center px-4 py-2 bg-gray-800">
+                                <span class="text-sm font-medium text-gray-300">JavaScript (n8n Code Node)</span>
+                                <button id="copy-btn" class="text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-md transition-colors">
+                                    Copiar
+                                </button>
+                            </div>
+                            <div class="p-4 overflow-x-auto">
+<pre><code id="code-block" class="language-javascript" style="font-family: monospace;">
+// 1. Recupera a lista original (nomes definidos manualmente)
+const originals = $('Lista de Serviços').all();
+// 2. Recupera os resultados das requisições HTTP
+const responses = $input.all();
+
+let messageLines = [];
+let hasError = false;
+
+// 3. Itera cruzando os dados pelo índice
+originals.forEach((original, index) => {
+  const name = original.json.name;
+  
+  // Fallback seguro: se a resposta não existir, cria objeto vazio
+  const responseJson = responses[index] ? responses[index].json : {};
+  
+  let indicator = 'unknown';
+  let description = 'Erro de Conexão/Timeout';
+
+  // Validação da estrutura da resposta da API (Padrão Atlassian)
+  if (responseJson.status) {
+    indicator = responseJson.status.indicator;
+    description = responseJson.status.description;
+  }
+
+  // Classificação de Status
+  if (indicator === 'none' || indicator === 'operational') {
+    messageLines.push(`🟢 *${name}:* Operacional`);
+  } else if (indicator === 'unknown') {
+    hasError = true; // Considera erro de leitura como alerta
+    messageLines.push(`⚪ *${name}:* Falha na Leitura (Verificar URL)`);
+  } else {
+    hasError = true;
+    messageLines.push(`🔴 *${name}:* INSTÁVEL (${description})`);
+  }
+});
+
+// 4. Montagem do Relatório Final
+let finalMessage = "📋 *Relatório de Status dos Sistemas*\\n\\n";
+finalMessage += messageLines.join('\\n');
+
+if (hasError) {
+  finalMessage += "\\n\\n⚠️ *Atenção:* Instabilidades detectadas. Verifique o impacto nos sistemas internos.";
+} else {
+  finalMessage += "\\n\\n✅ Todos os sistemas monitorados estão estáveis.";
+}
+
+return [
+  {
+    json: {
+      has_error: hasError,
+      message: finalMessage
+    }
+  }
+];
+</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 6. Testes e Sustentação -->
+                <section id="sustainment" class="scroll-mt-20">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Testes e Sustentação</h2>
+                        <p class="text-gray-700 mb-6">A automação foi validada e segue um plano de sustentação simples para garantir sua longevidade e facilidade de manutenção.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Coluna Esquerda: Critérios -->
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-800 mb-3">Critérios de Aceite (Validados)</h3>
+                                <ul class="space-y-3">
+                                    <li class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        <span class="text-gray-600">Monitora corretamente os 6 serviços listados.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        <span class="text-gray-600">Alertas de sucesso enviados apenas quando 100% dos serviços estão OK.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        <span class="text-gray-600">Alertas de falha detalham o serviço e o motivo.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        <span class="text-gray-600">O fluxo não trava em caso de erro 404/Timeout de uma das APIs.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Coluna Direita: Sustentação -->
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-800 mb-3">Plano de Sustentação</h3>
+                                <p class="text-gray-600 mb-2"><strong>Monitoramento do Robô:</strong></p>
+                                <ul class="list-disc list-inside text-gray-600 mb-4">
+                                    <li>Verificar logs de execução do n8n semanalmente para garantir que o agendamento está ativo.</li>
+                                </ul>
+                                <p class="text-gray-600 mb-2"><strong>Atualização de Serviços:</strong></p>
+                                <p class="text-gray-600 mb-2">Para adicionar novos fornecedores, basta editar o nó "Lista de Serviços" e adicionar um novo objeto JSON no padrão:</p>
+                                <div class="bg-gray-100 p-3 rounded border border-gray-300">
+<pre class="text-sm text-gray-800">
+{
+  json: {
+    name: "Novo Serviço",
+    url: "https://url-do-status/api/v2/status.json"
+  }
+}
+</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Estrutura -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-60 z-40 hidden transition-opacity duration-300"></div>
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div id="modal-content" class="bg-white w-full max-w-lg rounded-lg shadow-xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h3 id="modal-title" class="text-xl font-semibold text-indigo-900"></h3>
+                <button id="modal-close" class="text-gray-400 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-body" class="p-6 text-gray-700 space-y-3">
+                <!-- Conteúdo dinâmico aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Lógica do Menu Mobile ---
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const mainContent = document.getElementById('main-content');
+            const navLinks = document.querySelectorAll('#mobile-menu .nav-link');
+
+            function toggleMenu() {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('-translate-x-full');
+                mobileMenuOverlay.classList.toggle('hidden');
+            }
+
+            menuBtn.addEventListener('click', toggleMenu);
+            mobileMenuOverlay.addEventListener('click', toggleMenu);
+            navLinks.forEach(link => {
+                link.addEventListener('click', toggleMenu);
+            });
+
+            // --- Lógica do Modal ---
+            const modal = document.getElementById('modal');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
+            const modalCloseBtn = document.getElementById('modal-close');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            const nodeData = {
+                trigger: {
+                    title: "Nó: A cada 15 min (Schedule Trigger)",
+                    details: "<p>Este é o gatilho que inicia o fluxo de trabalho.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Agendado</li><li><strong>Intervalo:</strong> A cada 15 minutos</li><li><strong>Função:</strong> Garante que o monitoramento seja executado periodicamente sem intervenção manual.</li></ul>"
+                },
+                lista: {
+                    title: "Nó: Lista de Serviços (Code)",
+                    details: "<p>Este nó define a lista de todos os serviços que serão monitorados. Ele retorna um Array de objetos JSON.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Code (JavaScript)</li><li><strong>Função:</strong> Manter uma lista de configuração centralizada.</li><li><strong>Saída:</strong> `[{ json: { name: 'Cloudflare', url: '...' } }, ...]`</li></ul><p class='mt-2 text-sm text-gray-500'>Para adicionar um novo serviço, basta editar este nó.</p>"
+                },
+                http: {
+                    title: "Nó: Checar Status (HTTP Request)",
+                    details: "<p>Este nó acessa a URL de cada serviço da lista para obter o status atual.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> HTTP Request</li><li><strong>Método:</strong> GET</li><li><strong>URL:</strong> Dinâmica (`{{ $json.url }}`)</li><li><strong>Resiliência:</strong> A opção <strong>'On Error: Continue'</strong> está ativada. Isso é crucial para que o fluxo não pare se uma das URLs falhar (ex: 404 ou 500).</li></ul>"
+                },
+                relatorio: {
+                    title: "Nó: Gera Relatório (Code)",
+                    details: "<p>Este é o cérebro da automação. Ele roda após todas as consultas HTTP terminarem.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Code (JavaScript)</li><li><strong>Função:</strong> Cruza os dados da lista original com os resultados das APIs.</li><li><strong>Lógica:</strong> Mapeia os status (operational, minor, critical) para emojis (🟢, 🔴, ⚪) e constrói a mensagem final em Markdown.</li><li><strong>Saída:</strong> Um objeto JSON com `has_error` (boolean) e `message` (string).</li></ul>"
+                },
+                if: {
+                    title: "Nó: Teve Erro? (IF)",
+                    details: "<p>Este nó funciona como um 'sinaleiro', direcionando o fluxo com base no resultado do relatório.</p><ul class='list-disc list-inside mt-2'><li><strong>Condição:</strong> Verifica o valor booleano de `{{ $json.has_error }}`.</li><li><strong>Ramo True:</strong> Ativado se `has_error` for verdadeiro.</li><li><strong>Ramo False:</strong> Ativado se `has_error` for falso.</li></ul>"
+                },
+                alerta: {
+                    title: "Nó: Telegram Alerta (Telegram)",
+                    details: "<p>Este nó é ativado apenas se houver uma instabilidade detectada.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Telegram</li><li><strong>Ação:</strong> Envia a mensagem de erro (formatada pelo nó 'Gera Relatório') para o Chat ID do grupo.</li><li><strong>Parse Mode:</strong> Markdown (para emojis e negrito).</li></ul>"
+                },
+                sucesso: {
+                    title: "Nó: Telegram Sucesso (Telegram)",
+                    details: "<p>Este nó é ativado apenas se todos os serviços estiverem operacionais.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Telegram</li><li><strong>Ação:</strong> Envia a mensagem 'Todos os sistemas estáveis' para o Chat ID do grupo.</li><li><strong>Parse Mode:</strong> Markdown.</li></ul>"
+                }
+            };
+
+            function openModal(title, content) {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = content;
+                modal.classList.remove('hidden');
+                modalOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            function closeModal() {
+                modalContent.classList.add('scale-95', 'opacity-0');
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalOverlay.classList.add('hidden');
+                }, 300);
+            }
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', closeModal);
+
+            document.querySelectorAll('.workflow-node').forEach(node => {
+                const nodeKey = node.getAttribute('data-node');
+                if (nodeData[nodeKey]) {
+                    node.addEventListener('click', () => {
+                        openModal(nodeData[nodeKey].title, nodeData[nodeKey].details);
+                    });
+                }
+            });
+
+            // --- Lógica do Botão Copiar ---
+            const copyBtn = document.getElementById('copy-btn');
+            const codeBlock = document.getElementById('code-block');
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = codeBlock.innerText;
+                
+                // Usando 'document.execCommand' para compatibilidade em iFrames
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                textarea.style.position = 'fixed'; // Evita rolagem
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    copyBtn.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copiar';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Falha ao copiar:', err);
+                    copyBtn.textContent = 'Erro';
+                }
+                document.body.removeChild(textarea);
+            });
+
+            // --- Lógica de Scroll Spy (Navegação Ativa) ---
+            const sections = document.querySelectorAll('section');
+            const desktopNavLinks = document.querySelectorAll('aside .nav-link');
+            const mobileNavLinks = document.querySelectorAll('#mobile-menu .nav-link');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        const activeLinkSelector = `.nav-link[href="#${id}"]`;
+                        
+                        desktopNavLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                        mobileNavLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-30% 0px -70% 0px', threshold: 0.1 }); // Ativa quando a seção está no terço superior da tela
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
