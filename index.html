@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório Interativo | Monitor de Status n8n</title>
+    <title>Doc Interativa | Monitor Universal Multi-Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Tailwind Default (Gray, White, Blue/Indigo) -->
-    <!-- Application Structure Plan: SPA Responsiva com Menu Off-Canvas para Mobile e Sidebar Fixa para Desktop. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- Application Structure Plan: SPA Responsiva documentando o fluxo "Universal" atualizado com a lista completa de serviços (SaaS, Cloud, PaaS). -->
     <style>
         html {
             scroll-behavior: smooth;
@@ -39,7 +37,7 @@
         
         /* Nó Diamante (Decisão) */
         .workflow-node.diamond {
-            width: 140px; /* Levemente menor para mobile */
+            width: 140px;
             height: 80px;
             transform: rotate(45deg);
             display: flex;
@@ -61,7 +59,7 @@
             line-height: 1.1;
         }
 
-        /* Linhas de Ramificação (Branches) */
+        /* Linhas de Ramificação */
         .if-branch {
             position: relative;
             width: 100%;
@@ -85,195 +83,170 @@
         .if-branch.true-branch .workflow-arrow { right: 0; left: auto; }
         .if-branch.false-branch .workflow-arrow { left: 0; right: auto; }
 
-        /* Scrollbar sutil */
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         .nav-link.active {
-            background-color: #eef2ff;
-            color: #4f46e5;
+            background-color: #f0f9ff; /* sky-50 */
+            color: #0369a1; /* sky-700 */
             font-weight: 600;
-            border-right: 3px solid #4f46e5;
+            border-right: 3px solid #0369a1;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 h-full">
+<body class="bg-slate-50 text-slate-900 h-full">
 
     <div class="flex h-full flex-col md:flex-row">
         
-        <!-- Header Mobile (Fixo no topo) -->
-        <header class="md:hidden sticky top-0 bg-white shadow-sm z-30 w-full flex items-center justify-between p-4 border-b border-gray-200">
+        <!-- Header Mobile -->
+        <header class="md:hidden sticky top-0 bg-white shadow-sm z-30 w-full flex items-center justify-between p-4 border-b border-slate-200">
             <div class="flex items-center">
-                <span class="bg-indigo-600 text-white p-1.5 rounded-md mr-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span class="bg-sky-600 text-white p-1.5 rounded-md mr-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
                 </span>
-                <h2 class="text-lg font-bold text-indigo-900">Monitor n8n</h2>
+                <h2 class="text-lg font-bold text-slate-900">Monitor Universal</h2>
             </div>
-            <button id="menu-btn" class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button id="menu-btn" class="p-2 rounded-md text-slate-600 hover:bg-slate-100">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
         </header>
 
-        <!-- Overlay do Menu Mobile -->
-        <div id="mobile-menu-overlay" class="fixed inset-0 bg-gray-900/50 z-40 hidden transition-opacity duration-300 md:hidden backdrop-blur-sm"></div>
+        <!-- Overlay Mobile -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300 md:hidden backdrop-blur-sm"></div>
 
-        <!-- Sidebar de Navegação (Desktop Fixa / Mobile Off-canvas) -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-screen md:flex-shrink-0 overflow-y-auto">
-            <div class="p-6 hidden md:flex items-center border-b border-gray-100">
-                <span class="bg-indigo-600 text-white p-1.5 rounded-md mr-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-screen md:flex-shrink-0 overflow-y-auto">
+            <div class="p-6 hidden md:flex items-center border-b border-slate-100">
+                <span class="bg-sky-600 text-white p-1.5 rounded-md mr-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
                 </span>
                 <div>
-                    <h2 class="text-xl font-bold text-indigo-900">Monitor n8n</h2>
-                    <p class="text-xs text-gray-500 font-medium">Doc. Técnica v1.0</p>
+                    <h2 class="text-xl font-bold text-slate-900">Monitor Cloud</h2>
+                    <p class="text-xs text-slate-500 font-medium">Doc. Técnica v2.1</p>
                 </div>
             </div>
             
-            <!-- Título Mobile dentro do menu -->
-            <div class="p-4 md:hidden flex justify-between items-center border-b border-gray-100 bg-gray-50">
-                <span class="font-semibold text-gray-700">Menu</span>
-                <button id="close-menu-btn" class="text-gray-500">
+            <div class="p-4 md:hidden flex justify-between items-center border-b border-slate-100 bg-slate-50">
+                <span class="font-semibold text-slate-700">Menu</span>
+                <button id="close-menu-btn" class="text-slate-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
             <nav class="p-4 space-y-1">
-                <a href="#overview" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    Visão Geral
-                </a>
-                <a href="#requirement" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    Requisito Funcional
-                </a>
-                <a href="#architecture" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    Arquitetura do Fluxo
-                </a>
-                <a href="#services" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    Serviços Monitorados
-                </a>
-                <a href="#logic" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    Lógica Principal (JS)
-                </a>
-                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                    Testes e Sustentação
-                </a>
+                <a href="#overview" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Visão Geral</a>
+                <a href="#requirement" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Requisito Multi-Cloud</a>
+                <a href="#architecture" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Arquitetura Universal</a>
+                <a href="#services" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Serviços Monitorados</a>
+                <a href="#logic" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Código "Cérebro"</a>
+                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Sustentação</a>
             </nav>
         </aside>
 
-        <!-- Área de Conteúdo Principal -->
+        <!-- Main Content -->
         <main class="flex-1 h-[calc(100vh-64px)] md:h-screen overflow-y-auto scroll-smooth">
             <div class="max-w-5xl mx-auto p-4 md:p-10 space-y-16 pb-20">
                 
                 <!-- 1. Visão Geral -->
                 <section id="overview" class="scroll-mt-24 md:scroll-mt-10">
                     <div class="space-y-4">
-                        <span class="inline-block px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-100 rounded-full uppercase tracking-wide">Documentação Técnica</span>
-                        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight">Automação de Monitoramento de Status Pages</h1>
-                        <p class="text-lg text-gray-600 leading-relaxed">
-                            Esta documentação detalha a automação implementada no <strong>n8n</strong> para monitoramento ativo de provedores de serviço externos (SaaS/PaaS). O robô consulta endpoints JSON públicos e notifica grupos do Telegram sobre a saúde dos serviços.
+                        <span class="inline-block px-3 py-1 text-xs font-semibold text-sky-600 bg-sky-100 rounded-full uppercase tracking-wide">Documentação Técnica</span>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">Monitoramento Universal Multi-Cloud</h1>
+                        <p class="text-lg text-slate-600 leading-relaxed">
+                            Documentação da nova arquitetura do robô de monitoramento (v2.1). Esta versão implementa um <strong>"Tradutor Universal"</strong> capaz de consumir e normalizar dados de status de diferentes provedores (Google, Azure, Cloudflare, SAP, etc.) que utilizam padrões distintos (JSON, XML/RSS).
                         </p>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="text-xs font-bold text-gray-400 uppercase mb-1">Sistemas</div>
-                                <div class="font-semibold text-indigo-700">n8n, Telegram API</div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">Capacidade</div>
+                                <div class="font-semibold text-sky-700">Multi-Formato (JSON/XML)</div>
                             </div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="text-xs font-bold text-gray-400 uppercase mb-1">Público-Alvo</div>
-                                <div class="font-semibold text-gray-800">DevOps, Sustentação</div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">Status</div>
+                                <div class="font-semibold text-emerald-600">Produção</div>
                             </div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <div class="text-xs font-bold text-gray-400 uppercase mb-1">Tipo</div>
-                                <div class="font-semibold text-green-600">Nova Funcionalidade</div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">Nota</div>
+                                <div class="font-semibold text-amber-600">AWS Inativa (Code-Only)</div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <hr class="border-gray-200">
+                <hr class="border-slate-200">
 
-                <!-- 2. Requisito Funcional -->
+                <!-- 2. Requisito -->
                 <section id="requirement" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Requisito Funcional</h2>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Requisito Multi-Cloud</h2>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                         <div class="p-6 md:p-8 space-y-6">
                             <div>
-                                <h3 class="flex items-center text-lg font-semibold text-gray-800 mb-2">
-                                    <span class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 text-sm">1</span>
-                                    Cenário
+                                <h3 class="flex items-center text-lg font-semibold text-slate-800 mb-2">
+                                    Desafio Técnico
                                 </h3>
-                                <p class="text-gray-600 ml-11">A equipe de TI necessitava de visibilidade imediata sobre a indisponibilidade de fornecedores críticos (Cloudflare, SAP, Atlassian, etc.) para agilizar a resposta a incidentes.</p>
-                            </div>
-                            <div>
-                                <h3 class="flex items-center text-lg font-semibold text-gray-800 mb-2">
-                                    <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 text-sm">2</span>
-                                    Solução
-                                </h3>
-                                <p class="text-gray-600 ml-11">Fluxo automatizado no n8n que realiza a varredura a cada 15 minutos nas APIs de status públicas.</p>
-                            </div>
-                            <div>
-                                <h3 class="flex items-center text-lg font-semibold text-gray-800 mb-2">
-                                    <span class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 text-sm">3</span>
-                                    Comportamento
-                                </h3>
-                                <div class="ml-11 bg-gray-50 rounded-lg p-4 text-sm text-gray-700 border border-gray-100">
-                                    <ul class="space-y-2">
-                                        <li class="flex items-start">
-                                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            Coleta status de 6 serviços simultaneamente.
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            Processa dados para identificar falhas (`status != operational`).
-                                        </li>
-                                        <li class="flex items-start">
-                                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            Envia relatório consolidado para o Telegram.
-                                        </li>
-                                    </ul>
+                                <p class="text-slate-600">O monitoramento abrange provedores de nuvem e SaaS que não seguem um padrão único de Status Page, exigindo suporte a múltiplos formatos:</p>
+                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                                        <span class="font-bold text-slate-700">Google Cloud</span>
+                                        <span class="text-sm text-slate-500 block">Retorna uma Lista JSON (`[]`).</span>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                                        <span class="font-bold text-slate-700">Azure (Microsoft)</span>
+                                        <span class="text-sm text-slate-500 block">Retorna XML (RSS Feed).</span>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                                        <span class="font-bold text-slate-700">SaaS (Atlassian/SAP/Outros)</span>
+                                        <span class="text-sm text-slate-500 block">Retorna Objeto JSON (`{status:...}`).</span>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded border border-slate-200 opacity-75">
+                                        <span class="font-bold text-slate-500">AWS (Amazon)</span>
+                                        <span class="text-sm text-slate-400 block">Código presente, mas comentado (Inativo).</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <hr class="border-gray-200">
+                <hr class="border-slate-200">
 
-                <!-- 3. Arquitetura do Fluxo -->
+                <!-- 3. Arquitetura -->
                 <section id="architecture" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Arquitetura do Fluxo</h2>
-                    <p class="text-gray-600 mb-6">Representação visual do workflow `Monitor_Status_Services_Telegram`. <span class="hidden md:inline">Clique nos nós para ver detalhes.</span><span class="md:hidden text-indigo-600 font-medium">Toque nos nós para detalhes.</span></p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Arquitetura Universal</h2>
+                    <p class="text-slate-600 mb-6">Abaixo está o fluxo atualizado. O diferencial é o tratamento de dados como <strong>Texto Bruto</strong> no HTTP Request para evitar erros de parseamento do XML da Azure.</p>
                     
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-8 overflow-hidden">
-                        <!-- Container com Scroll Horizontal para Mobile -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-8 overflow-hidden">
                         <div class="overflow-x-auto pb-4 custom-scrollbar flex flex-col items-center min-w-[300px]">
                             
-                            <!-- Nó Inicial -->
-                            <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="trigger">
+                            <!-- Nó 1 -->
+                            <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="trigger">
                                 <div class="text-xs font-bold uppercase text-green-600 mb-1">Trigger</div>
                                 <div class="font-semibold text-sm">A cada 15 min</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 2 -->
-                            <div class="workflow-node bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="lista">
-                                <div class="text-xs font-bold uppercase text-gray-400 mb-1">Code</div>
-                                <div class="font-semibold text-sm">Lista de Serviços</div>
+                            <div class="workflow-node bg-white border border-slate-300 hover:border-sky-400 text-slate-800 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="lista">
+                                <div class="text-xs font-bold uppercase text-slate-400 mb-1">Code</div>
+                                <div class="font-semibold text-sm">Lista Big Techs</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 3 -->
-                            <div class="workflow-node bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="http">
-                                <div class="text-xs font-bold uppercase text-gray-400 mb-1">HTTP Request</div>
-                                <div class="font-semibold text-sm">Checar Status</div>
+                            <div class="workflow-node bg-amber-50 border border-amber-300 hover:border-amber-500 text-amber-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="http">
+                                <div class="text-xs font-bold uppercase text-amber-600 mb-1">HTTP Request</div>
+                                <div class="font-semibold text-sm">Baixar Dados (Auto Decode)</div>
+                                <div class="text-[10px] text-amber-700 mt-1">(Response Format: Text)</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 4 -->
-                            <div class="workflow-node bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="relatorio">
-                                <div class="text-xs font-bold uppercase text-gray-400 mb-1">Code</div>
-                                <div class="font-semibold text-sm">Gera Relatório</div>
+                            <div class="workflow-node bg-indigo-50 border border-indigo-300 hover:border-indigo-500 text-indigo-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="cerebro">
+                                <div class="text-xs font-bold uppercase text-indigo-600 mb-1">Code (JS)</div>
+                                <div class="font-semibold text-sm">Cérebro Multi-Cloud</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
@@ -282,215 +255,236 @@
                                 <span class="font-bold text-sm">Teve Erro?</span>
                             </div>
                             
-                            <!-- Branches do IF -->
+                            <!-- Branches -->
                             <div class="flex w-full max-w-md mt-2">
-                                <!-- Ramo Falso -->
                                 <div class="w-1/2 px-1 text-center relative if-branch false-branch">
-                                    <span class="text-xs font-bold text-gray-400 bg-white px-1 absolute -top-7 left-1/4 z-10">False</span>
+                                    <span class="text-xs font-bold text-slate-400 bg-white px-1 absolute -top-7 left-1/4 z-10">False</span>
                                     <div class="workflow-arrow" style="margin-top: -15px;"></div>
-                                    <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4 transition-all active:scale-95" data-node="sucesso">
+                                    <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4" data-node="sucesso">
                                         <div class="text-xs font-bold uppercase text-green-600 mb-1">Telegram</div>
                                         <div class="font-semibold text-sm">Sucesso</div>
                                     </div>
                                 </div>
-                                <!-- Ramo Verdadeiro -->
                                 <div class="w-1/2 px-1 text-center relative if-branch true-branch">
                                     <span class="text-xs font-bold text-red-400 bg-white px-1 absolute -top-7 right-1/4 z-10">True</span>
                                     <div class="workflow-arrow" style="margin-top: -15px;"></div>
-                                    <div class="workflow-node bg-red-50 border border-red-200 hover:border-red-400 text-red-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4 transition-all active:scale-95" data-node="alerta">
+                                    <div class="workflow-node bg-red-50 border border-red-200 hover:border-red-400 text-red-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4" data-node="alerta">
                                         <div class="text-xs font-bold uppercase text-red-600 mb-1">Telegram</div>
                                         <div class="font-semibold text-sm">Alerta</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-center text-xs text-gray-400 mt-4 md:hidden">Arraste horizontalmente se necessário</p>
                     </div>
                 </section>
 
-                <hr class="border-gray-200">
+                <hr class="border-slate-200">
 
-                <!-- 4. Serviços Monitorados -->
+                <!-- 4. Serviços -->
                 <section id="services" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Serviços Monitorados</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Serviços Monitorados</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Card -->
-                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">C</div>
+                        <!-- Azure -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-sky-500">
                             <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-900">Cloudflare</h3>
-                                <p class="text-xs text-gray-500 truncate">cloudflarestatus.com</p>
+                                <h3 class="font-semibold text-slate-900">Azure</h3>
+                                <p class="text-xs text-slate-500">XML/RSS</p>
                             </div>
                         </div>
-                        <!-- Card -->
-                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">I</div>
+                        <!-- Google -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-blue-500">
                             <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-900">Infobip</h3>
-                                <p class="text-xs text-gray-500 truncate">status.infobip.com</p>
+                                <h3 class="font-semibold text-slate-900">Google Cloud</h3>
+                                <p class="text-xs text-slate-500">JSON Array</p>
                             </div>
                         </div>
-                        <!-- Card -->
-                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">U</div>
+                        <!-- Cloudflare -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
                             <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-900">Unico</h3>
-                                <p class="text-xs text-gray-500 truncate">status.unico.io</p>
+                                <h3 class="font-semibold text-slate-900">Cloudflare</h3>
+                                <p class="text-xs text-slate-500">JSON Atlassian</p>
                             </div>
                         </div>
-                        <!-- Card -->
-                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">S</div>
+                        <!-- Infobip -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
                             <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-900">Serasa</h3>
-                                <p class="text-xs text-gray-500 truncate">status.allowme.com.br</p>
+                                <h3 class="font-semibold text-slate-900">Infobip</h3>
+                                <p class="text-xs text-slate-500">JSON Atlassian</p>
                             </div>
                         </div>
-                        <!-- Card -->
-                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-bold">S</div>
+                        <!-- Unico -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
                             <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-900">SAP for Me</h3>
-                                <p class="text-xs text-gray-500 truncate">status.me.sap.com</p>
+                                <h3 class="font-semibold text-slate-900">Unico</h3>
+                                <p class="text-xs text-slate-500">JSON Atlassian</p>
                             </div>
                         </div>
-                        <!-- Card -->
-                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">A</div>
+                        <!-- Serasa -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
                             <div class="min-w-0">
-                                <h3 class="font-semibold text-gray-900">Atlassian</h3>
-                                <p class="text-xs text-gray-500 truncate">status.atlassian.com</p>
+                                <h3 class="font-semibold text-slate-900">Serasa</h3>
+                                <p class="text-xs text-slate-500">JSON Atlassian</p>
+                            </div>
+                        </div>
+                        <!-- SAP -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-slate-900">SAP for Me</h3>
+                                <p class="text-xs text-slate-500">JSON Atlassian</p>
+                            </div>
+                        </div>
+                        <!-- Atlassian -->
+                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-slate-900">Atlassian</h3>
+                                <p class="text-xs text-slate-500">JSON Atlassian</p>
                             </div>
                         </div>
                     </div>
+                    <div class="mt-4 text-sm text-slate-500 bg-slate-50 p-3 rounded border border-slate-200 inline-block">
+                        <strong>Nota AWS:</strong> O endpoint <code>data.json</code> da Amazon está presente no código, mas comentado (desativado) devido a bloqueios de WAF.
+                    </div>
                 </section>
 
-                <hr class="border-gray-200">
+                <hr class="border-slate-200">
 
-                <!-- 5. Lógica Principal -->
+                <!-- 5. Lógica JS -->
                 <section id="logic" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Lógica Principal (JS)</h2>
-                    <p class="text-gray-600 mb-6">Script JavaScript (ES6) usado no nó "Gera Relatório" para cruzar dados e formatar a mensagem.</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Código "Cérebro Multi-Cloud"</h2>
+                    <p class="text-slate-600 mb-6">Este é o script que normaliza os dados. Note como ele verifica se o dado recebido é JSON ou XML (para Azure) antes de processar.</p>
                     
-                    <div class="bg-gray-900 text-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="flex justify-between items-center px-4 py-3 bg-gray-800 border-b border-gray-700">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                            </div>
-                            <button id="copy-btn" class="text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded transition-colors flex items-center">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <div class="bg-slate-900 text-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="flex justify-between items-center px-4 py-3 bg-slate-800 border-b border-slate-700">
+                            <span class="text-xs font-mono text-slate-400">JavaScript (Code Node)</span>
+                            <button id="copy-btn" class="text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded transition-colors">
                                 Copiar Código
                             </button>
                         </div>
                         <div class="p-4 overflow-x-auto">
-<pre><code id="code-block" class="language-javascript text-sm font-mono leading-relaxed text-gray-300">
-// 1. Recupera a lista original (nomes definidos manualmente)
-const originals = $('Lista de Serviços').all();
-// 2. Recupera os resultados das requisições HTTP
+<pre><code id="code-block" class="language-javascript text-sm font-mono leading-relaxed text-slate-300">
+const originals = $('Lista Big Techs').all();
 const responses = $input.all();
 
 let messageLines = [];
 let hasError = false;
 
-// 3. Itera cruzando os dados pelo índice
 originals.forEach((original, index) => {
   const name = original.json.name;
-  
-  // Fallback seguro: se a resposta não existir, cria objeto vazio
-  const responseJson = responses[index] ? responses[index].json : {};
+  // Pega dados brutos (string ou json)
+  const rawData = responses[index] ? (responses[index].json.data || responses[index].json) : "";
   
   let indicator = 'unknown';
-  let description = 'Erro de Conexão/Timeout';
+  let description = 'Erro de Leitura';
 
-  // Validação da estrutura da resposta da API (Padrão Atlassian)
-  if (responseJson.status) {
-    indicator = responseJson.status.indicator;
-    description = responseJson.status.description;
+  try {
+    let jsonData = null;
+    
+    // Tenta converter para JSON (se não for XML)
+    if (typeof rawData === 'object') {
+        jsonData = rawData;
+    } else if (typeof rawData === 'string') {
+        // Ignora se parecer XML (Azure)
+        if (!rawData.trim().startsWith('<') && !rawData.includes('<?xml')) {
+            try { jsonData = JSON.parse(rawData); } catch(e) { jsonData = null; }
+        }
+    }
+
+    // 1. LÓGICA GOOGLE (Array)
+    if (Array.isArray(jsonData)) {
+       if (jsonData.length === 0) {
+         indicator = 'none';
+       } else {
+         indicator = 'critical';
+         description = jsonData[0].external_desc || "Incidente Google Cloud";
+       }
+    }
+    // 2. LÓGICA ATLASSIAN / PADRÃO (Cloudflare, Infobip, SAP, Unico, etc.)
+    else if (jsonData && jsonData.status) {
+       indicator = jsonData.status.indicator;
+       description = jsonData.status.description;
+    }
+    // 3. LÓGICA AZURE (XML/RSS - Detecção via String)
+    else if (typeof rawData === 'string' && (rawData.includes('<?xml') || rawData.includes('<rss'))) {
+       // Se tiver a tag <item>, existe um incidente publicado
+       if (rawData.includes('<item>')) {
+         indicator = 'critical';
+         description = "Incidente no Feed Azure";
+       } else {
+         indicator = 'none';
+       }
+    }
+    // 4. LÓGICA AWS (Inativa / Comentada no Código Fonte)
+    else {
+        description = "Formato desconhecido/vazio";
+    }
+
+  } catch (err) {
+    indicator = 'unknown';
+    description = "Erro script: " + err.message;
   }
 
-  // Classificação de Status
+  // Formatação Visual
   if (indicator === 'none' || indicator === 'operational') {
     messageLines.push(`🟢 *${name}:* Operacional`);
   } else if (indicator === 'unknown') {
-    hasError = true; 
-    messageLines.push(`⚪ *${name}:* Falha na Leitura`);
+    messageLines.push(`⚪ *${name}:* ${description}`);
   } else {
     hasError = true;
     messageLines.push(`🔴 *${name}:* INSTÁVEL (${description})`);
   }
 });
 
-// 4. Montagem do Relatório Final
-let finalMessage = "📋 *Relatório de Status*\\n\\n";
+// Mensagem Final
+let finalMessage = "☁️ *Monitoramento de Nuvem*\\n\\n";
 finalMessage += messageLines.join('\\n');
 
 if (hasError) {
   finalMessage += "\\n\\n⚠️ *Atenção:* Instabilidades detectadas.";
 } else {
-  finalMessage += "\\n\\n✅ Todos os sistemas monitorados estão estáveis.";
+  finalMessage += "\\n\\n✅ Infraestrutura de nuvem estável.";
 }
 
-return [
-  {
-    json: {
-      has_error: hasError,
-      message: finalMessage
-    }
-  }
-];
+return [{ json: { has_error: hasError, message: finalMessage } }];
 </code></pre>
                         </div>
                     </div>
                 </section>
-                
-                <hr class="border-gray-200">
 
                 <!-- 6. Sustentação -->
                 <section id="sustainment" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Sustentação</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-green-50 p-6 rounded-xl border border-green-100">
-                            <h3 class="font-bold text-green-800 mb-4 flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                Checklist de Validação
-                            </h3>
-                            <ul class="space-y-3 text-sm text-green-800">
-                                <li>✓ Monitoramento dos 6 serviços ativo.</li>
-                                <li>✓ Alertas de sucesso apenas com 100% de uptime.</li>
-                                <li>✓ Resiliência a falhas de API (404/500) testada.</li>
-                            </ul>
-                        </div>
-                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
-                            <h3 class="font-bold text-indigo-800 mb-4 flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                Manutenção
-                            </h3>
-                            <p class="text-sm text-indigo-800 mb-2">Para adicionar um serviço:</p>
-                            <code class="block bg-white px-2 py-1 rounded text-xs border border-indigo-200 text-indigo-600 font-mono">{ json: { name: "Novo", url: "..." } }</code>
-                        </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Sustentação</h2>
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-4">Pontos de Atenção</h3>
+                        <ul class="space-y-3 text-sm text-slate-700">
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-amber-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <span><strong>AWS:</strong> Mantida a lógica no código para reativação futura, mas removida da lista de execução para evitar ruído de alertas falsos.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-sky-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span><strong>Expansão:</strong> Serviços novos que usam o padrão Atlassian (como Serasa, SAP, Unico) funcionam automaticamente ao serem adicionados na "Lista Big Techs", pois caem na lógica "Lógica Atlassian" do script.</span>
+                            </li>
+                        </ul>
                     </div>
                 </section>
+
             </div>
         </main>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal Detalhes -->
     <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden transition-opacity duration-300 backdrop-blur-sm"></div>
     <div id="modal" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4 hidden">
         <div id="modal-content" class="bg-white w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 translate-y-full md:translate-y-0 md:scale-95 md:opacity-0">
-            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
-                <h3 id="modal-title" class="text-lg font-bold text-gray-900"></h3>
-                <button id="modal-close" class="p-1 rounded-full hover:bg-gray-200 transition-colors">
-                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <div class="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50">
+                <h3 id="modal-title" class="text-lg font-bold text-slate-900"></h3>
+                <button id="modal-close" class="p-1 rounded-full hover:bg-slate-200 transition-colors text-slate-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div id="modal-body" class="p-6 text-gray-600 space-y-4 max-h-[70vh] overflow-y-auto">
-                <!-- Conteúdo -->
-            </div>
-            <div class="p-4 border-t border-gray-100 bg-gray-50 md:hidden">
-                <button id="modal-close-btn-bottom" class="w-full bg-gray-200 text-gray-800 font-semibold py-3 rounded-lg">Fechar</button>
+            <div id="modal-body" class="p-6 text-slate-600 space-y-4 max-h-[70vh] overflow-y-auto"></div>
+            <div class="p-4 border-t border-slate-100 bg-slate-50 md:hidden">
+                <button id="modal-close-btn-bottom" class="w-full bg-slate-200 text-slate-800 font-semibold py-3 rounded-lg">Fechar</button>
             </div>
         </div>
     </div>
@@ -503,55 +497,48 @@ return [
             const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
             const navLinks = document.querySelectorAll('.nav-link');
 
-            function openMenu() {
-                sidebar.classList.remove('-translate-x-full');
-                mobileMenuOverlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Evita scroll no body
+            function toggleMenu(show) {
+                if (show) {
+                    sidebar.classList.remove('-translate-x-full');
+                    mobileMenuOverlay.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    mobileMenuOverlay.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
             }
 
-            function closeMenu() {
-                sidebar.classList.add('-translate-x-full');
-                mobileMenuOverlay.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
+            menuBtn.addEventListener('click', () => toggleMenu(true));
+            closeMenuBtn.addEventListener('click', () => toggleMenu(false));
+            mobileMenuOverlay.addEventListener('click', () => toggleMenu(false));
+            navLinks.forEach(l => l.addEventListener('click', () => { if(window.innerWidth < 768) toggleMenu(false) }));
 
-            menuBtn.addEventListener('click', openMenu);
-            closeMenuBtn.addEventListener('click', closeMenu);
-            mobileMenuOverlay.addEventListener('click', closeMenu);
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 768) { // Só fecha no mobile
-                        closeMenu();
-                    }
-                });
-            });
-
-            // --- Modal Logic ---
+            // Modal Logic
             const modal = document.getElementById('modal');
             const modalOverlay = document.getElementById('modal-overlay');
             const modalContent = document.getElementById('modal-content');
-            const modalCloseBtn = document.getElementById('modal-close');
-            const modalCloseBtnBottom = document.getElementById('modal-close-btn-bottom');
             const modalTitle = document.getElementById('modal-title');
             const modalBody = document.getElementById('modal-body');
+            const modalCloseBtn = document.getElementById('modal-close');
+            const modalCloseBtnBottom = document.getElementById('modal-close-btn-bottom');
 
             const nodeData = {
-                trigger: { title: "Nó: A cada 15 min", details: "<p>Gatilho agendado (Schedule Trigger).</p><p class='mt-2'>Garante que o monitoramento rode periodicamente sem intervenção.</p>" },
-                lista: { title: "Nó: Lista de Serviços", details: "<p>Define a lista de serviços JSON.</p><p class='mt-2 text-sm'>Para adicionar um serviço, edite o Array JSON neste nó.</p>" },
-                http: { title: "Nó: Checar Status", details: "<p>Faz requisições GET para as APIs.</p><p class='mt-2 text-sm bg-yellow-50 p-2 rounded text-yellow-800 border border-yellow-200'><strong>Importante:</strong> A opção 'On Error: Continue' deve estar ativa para não travar o fluxo.</p>" },
-                relatorio: { title: "Nó: Gera Relatório", details: "<p>Script JS que cruza os dados.</p><p class='mt-2'>Transforma códigos de status (none, major, critical) em emojis visuais.</p>" },
-                if: { title: "Nó: Teve Erro?", details: "<p>Condicional simples.</p><p class='mt-2'>Se <code>has_error == true</code>, vai para Alerta. Se não, Sucesso.</p>" },
-                alerta: { title: "Nó: Telegram Alerta", details: "<p>Envia mensagem formatada com falhas.</p>" },
-                sucesso: { title: "Nó: Telegram Sucesso", details: "<p>Envia mensagem de 'Tudo OK'.</p>" }
+                trigger: { title: "Nó: Trigger (Agendamento)", details: "<p>Inicia o fluxo a cada 15 minutos.</p>" },
+                lista: { title: "Nó: Lista Big Techs", details: "<p>Define o Array de serviços (Azure, Google, e lista expandida de SaaS). AWS está comentada nesta lista para evitar erros.</p>" },
+                http: { title: "Nó: Baixar Dados (Auto Decode)", details: "<p>Realiza o GET nas URLs. <strong>Configuração Crítica:</strong> 'Response Format' deve ser 'Text'. Isso impede que o n8n tente ler XML como JSON e falhe.</p>" },
+                cerebro: { title: "Nó: Cérebro Multi-Cloud", details: "<p>O coração do fluxo. Detecta se o texto recebido é XML (Azure), JSON Array (Google) ou JSON Object (Padrão Atlassian) e aplica a lógica de extração correta.</p>" },
+                if: { title: "Nó: Teve Erro?", details: "<p>Verifica se a variável <code>has_error</code> é verdadeira.</p>" },
+                alerta: { title: "Nó: Telegram Alerta", details: "<p>Envia mensagem formatada com os incidentes.</p>" },
+                sucesso: { title: "Nó: Telegram Sucesso", details: "<p>Envia mensagem de estabilidade total.</p>" }
             };
 
-            function openModal(title, content) {
-                modalTitle.textContent = title;
-                modalBody.innerHTML = content;
+            function openModal(key) {
+                if(!nodeData[key]) return;
+                modalTitle.innerText = nodeData[key].title;
+                modalBody.innerHTML = nodeData[key].details;
                 modal.classList.remove('hidden');
                 modalOverlay.classList.remove('hidden');
-                // Animação de entrada
                 setTimeout(() => {
                     modalContent.classList.remove('translate-y-full', 'md:scale-95', 'md:opacity-0');
                     modalContent.classList.add('translate-y-0', 'md:scale-100', 'md:opacity-100');
@@ -567,44 +554,22 @@ return [
                 }, 300);
             }
 
-            [modalCloseBtn, modalCloseBtnBottom, modalOverlay].forEach(el => {
-                if(el) el.addEventListener('click', closeModal);
+            document.querySelectorAll('.workflow-node').forEach(n => {
+                n.addEventListener('click', () => openModal(n.getAttribute('data-node')));
             });
 
-            document.querySelectorAll('.workflow-node').forEach(node => {
-                const nodeKey = node.getAttribute('data-node');
-                if (nodeData[nodeKey]) {
-                    node.addEventListener('click', () => {
-                        openModal(nodeData[nodeKey].title, nodeData[nodeKey].details);
-                    });
-                }
-            });
+            [modalCloseBtn, modalCloseBtnBottom, modalOverlay].forEach(el => el.addEventListener('click', closeModal));
 
-            // --- Copy Logic ---
+            // Copy Code
             const copyBtn = document.getElementById('copy-btn');
             const codeBlock = document.getElementById('code-block');
-
             copyBtn.addEventListener('click', () => {
-                const textToCopy = codeBlock.innerText;
-                const textarea = document.createElement('textarea');
-                textarea.value = textToCopy;
-                textarea.style.position = 'fixed';
-                textarea.style.left = '-9999px';
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                    document.execCommand('copy');
-                    const originalText = copyBtn.innerHTML;
-                    copyBtn.innerHTML = `<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copiado!`;
-                    copyBtn.classList.replace('bg-gray-700', 'bg-green-600');
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalText;
-                        copyBtn.classList.replace('bg-green-600', 'bg-gray-700');
-                    }, 2000);
-                } catch (err) {
-                    console.error('Erro ao copiar', err);
-                }
-                document.body.removeChild(textarea);
+                const ta = document.createElement('textarea');
+                ta.value = codeBlock.innerText;
+                ta.style.position='fixed'; ta.style.left='-9999px';
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); copyBtn.textContent = "Copiado!"; setTimeout(()=> copyBtn.textContent="Copiar Código", 2000); } catch(e){}
+                document.body.removeChild(ta);
             });
         });
     </script>
