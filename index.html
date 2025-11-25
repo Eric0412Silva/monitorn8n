@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-br" class="h-full">
+<html lang="pt-br" class="h-full antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório Interativo | Monitor de Status n8n</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Tailwind Default (Gray, White, Blue) -->
-    <!-- Application Structure Plan: Uma aplicação de página única (SPA) com layout responsivo. Uma barra lateral fixa (desktop) e um menu hamburger (mobile) fornecem a navegação. A área de conteúdo principal é rolável, com seções correspondentes aos links de navegação. Um diagrama de fluxo de trabalho interativo baseado em HTML/Tailwind é a peça central, permitindo aos usuários clicar nos nós para abrir um modal com detalhes. Esta estrutura foi escolhida para transformar o documento de texto linear em uma experiência explorável, visual e interativa, focando no próprio processo do fluxo de trabalho. -->
-    <!-- Visualization & Content Choices: 1. Diagrama de Fluxo de Trabalho (Processo): Blocos HTML/Tailwind (divs) estilizados como nós e conectados com bordas/flexbox. Objetivo: Organizar/Explicar. Interação: Clicar no nó -> Abrir modal. Justificativa: Representa visualmente o fluxo n8n sem SVG/Mermaid, tornando a arquitetura central explorável. 2. Lista de Serviços (Dados): Grade de cartões Tailwind. Objetivo: Informar. Justificativa: Lista de forma limpa os serviços monitorados. 3. Lógica Principal (Código): Bloco <pre><code> com um botão 'Copiar' alimentado por JS. Objetivo: Informar/Reutilizar. Interação: Clicar no botão -> Copiar código. Justificativa: Torna o artefato técnico principal (o código JS) acessível. 4. Modais (Detalhes): Modal JS/Tailwind para exibir detalhes dos nós. Objetivo: Informar (sob demanda). Interação: Clique para abrir/fechar. Justificativa: Fornece informações em camadas sem sobrecarregar a UI principal. -->
+    <!-- Chosen Palette: Tailwind Default (Gray, White, Blue/Indigo) -->
+    <!-- Application Structure Plan: SPA Responsiva com Menu Off-Canvas para Mobile e Sidebar Fixa para Desktop. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         html {
             scroll-behavior: smooth;
         }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
         }
-        /* Estilos para a seta de conexão do fluxo */
+        
+        /* --- Estilos do Diagrama de Fluxo --- */
         .workflow-arrow {
             position: relative;
             height: 30px;
@@ -34,25 +34,34 @@
             height: 0;
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
-            border-top: 5px solid #9ca3af; /* gray-400 */
+            border-top: 5px solid #9ca3af;
         }
-        /* Estilos para o nó de "IF" (Diamante) */
+        
+        /* Nó Diamante (Decisão) */
         .workflow-node.diamond {
-            width: 180px;
-            height: 100px;
+            width: 140px; /* Levemente menor para mobile */
+            height: 80px;
             transform: rotate(45deg);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin: 20px auto;
+        }
+        @media (min-width: 768px) {
+            .workflow-node.diamond {
+                width: 180px;
+                height: 100px;
+            }
         }
         .workflow-node.diamond span {
             transform: rotate(-45deg);
-            max-width: 100px;
+            max-width: 120px;
             text-align: center;
+            font-size: 0.9rem;
+            line-height: 1.1;
         }
-        /* Linhas horizontais para o "IF" */
+
+        /* Linhas de Ramificação (Branches) */
         .if-branch {
             position: relative;
             width: 100%;
@@ -66,283 +75,317 @@
             height: 2px;
             background-color: #9ca3af;
         }
-        .if-branch.true-branch::before {
-            left: 50%;
-        }
-        .if-branch.false-branch::before {
-            right: 50%;
-            width: 50%;
-            left: 0;
-        }
+        .if-branch.true-branch::before { left: 50%; }
+        .if-branch.false-branch::before { right: 50%; width: 50%; left: 0; }
+        
         .if-branch .workflow-arrow {
             position: absolute;
             top: -15px;
         }
-        .if-branch.true-branch .workflow-arrow {
-            right: 0;
-            left: auto;
-        }
-        .if-branch.false-branch .workflow-arrow {
-            left: 0;
-            right: auto;
-        }
-        /* Scrollbar customizada */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9; /* gray-100 */
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #9ca3af; /* gray-400 */
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
-        }
-        /* Estado ativo da navegação */
+        .if-branch.true-branch .workflow-arrow { right: 0; left: auto; }
+        .if-branch.false-branch .workflow-arrow { left: 0; right: auto; }
+
+        /* Scrollbar sutil */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
         .nav-link.active {
-            background-color: #eef2ff; /* indigo-50 */
-            color: #4f46e5; /* indigo-700 */
+            background-color: #eef2ff;
+            color: #4f46e5;
             font-weight: 600;
+            border-right: 3px solid #4f46e5;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-900 h-full">
+<body class="bg-gray-50 text-gray-900 h-full">
 
-    <div class="flex h-full">
-        <!-- Barra Lateral Desktop -->
-        <aside class="w-64 h-screen fixed top-0 left-0 bg-white shadow-lg hidden md:flex flex-col z-20">
-            <div class="p-6">
-                <h2 class="text-xl font-bold text-indigo-700">Monitor n8n</h2>
-                <p class="text-sm text-gray-500">Documentação Interativa</p>
+    <div class="flex h-full flex-col md:flex-row">
+        
+        <!-- Header Mobile (Fixo no topo) -->
+        <header class="md:hidden sticky top-0 bg-white shadow-sm z-30 w-full flex items-center justify-between p-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <span class="bg-indigo-600 text-white p-1.5 rounded-md mr-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </span>
+                <h2 class="text-lg font-bold text-indigo-900">Monitor n8n</h2>
             </div>
-            <nav class="flex-1 px-4 space-y-2">
-                <a href="#overview" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6-4l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M12 12l.01.01M1Player.me_Logo.png </path></svg>
-                    <span>Visão Geral</span>
+            <button id="menu-btn" class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <!-- Overlay do Menu Mobile -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-gray-900/50 z-40 hidden transition-opacity duration-300 md:hidden backdrop-blur-sm"></div>
+
+        <!-- Sidebar de Navegação (Desktop Fixa / Mobile Off-canvas) -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-screen md:flex-shrink-0 overflow-y-auto">
+            <div class="p-6 hidden md:flex items-center border-b border-gray-100">
+                <span class="bg-indigo-600 text-white p-1.5 rounded-md mr-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </span>
+                <div>
+                    <h2 class="text-xl font-bold text-indigo-900">Monitor n8n</h2>
+                    <p class="text-xs text-gray-500 font-medium">Doc. Técnica v1.0</p>
+                </div>
+            </div>
+            
+            <!-- Título Mobile dentro do menu -->
+            <div class="p-4 md:hidden flex justify-between items-center border-b border-gray-100 bg-gray-50">
+                <span class="font-semibold text-gray-700">Menu</span>
+                <button id="close-menu-btn" class="text-gray-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <nav class="p-4 space-y-1">
+                <a href="#overview" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    Visão Geral
                 </a>
-                <a href="#requirement" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                    <span>Requisito Funcional</span>
+                <a href="#requirement" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    Requisito Funcional
                 </a>
-                <a href="#architecture" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span>Arquitetura do Fluxo</span>
+                <a href="#architecture" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    Arquitetura do Fluxo
                 </a>
-                <a href="#services" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    <span>Serviços Monitorados</span>
+                <a href="#services" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    Serviços Monitorados
                 </a>
-                <a href="#logic" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                    <span>Lógica Principal (JS)</span>
+                <a href="#logic" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    Lógica Principal (JS)
                 </a>
-                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Testes e Sustentação</span>
+                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-r-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                    Testes e Sustentação
                 </a>
             </nav>
         </aside>
 
-        <!-- Header Mobile -->
-        <header class="md:hidden sticky top-0 bg-white shadow-md z-30 w-full flex items-center justify-between p-4">
-            <h2 class="text-xl font-bold text-indigo-700">Monitor n8n</h2>
-            <button id="menu-btn" class="text-gray-600 hover:text-gray-900">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-        </header>
-
-        <!-- Menu Mobile (Oculto) -->
-        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
-        <nav id="mobile-menu" class="fixed top-0 left-0 w-64 h-full bg-white z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
-            <div class="p-6">
-                <h2 class="text-xl font-bold text-indigo-700">Navegação</h2>
-            </div>
-            <div class="px-4 space-y-2">
-                <a href="#overview" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Visão Geral</a>
-                <a href="#requirement" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Requisito Funcional</a>
-                <a href="#architecture" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Arquitetura do Fluxo</a>
-                <a href="#services" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Serviços Monitorados</a>
-                <a href="#logic" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Lógica Principal (JS)</a>
-                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">Testes e Sustentação</a>
-            </div>
-        </nav>
-
-        <!-- Conteúdo Principal -->
-        <main id="main-content" class="md:ml-64 flex-1 h-screen overflow-y-auto pb-24">
-            <div class="p-4 md:p-8 space-y-12">
+        <!-- Área de Conteúdo Principal -->
+        <main class="flex-1 h-[calc(100vh-64px)] md:h-screen overflow-y-auto scroll-smooth">
+            <div class="max-w-5xl mx-auto p-4 md:p-10 space-y-16 pb-20">
                 
                 <!-- 1. Visão Geral -->
-                <section id="overview" class="scroll-mt-20">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h1 class="text-3xl font-bold text-indigo-900 mb-4">Automação de Monitoramento de Status Pages</h1>
-                        <p class="text-lg text-gray-600 mb-6">Esta documentação detalha a automação implementada no n8n para monitoramento ativo de provedores de serviço externos (SaaS/PaaS). O robô consulta endpoints JSON públicos e notifica grupos do Telegram sobre a saúde dos serviços.</p>
+                <section id="overview" class="scroll-mt-24 md:scroll-mt-10">
+                    <div class="space-y-4">
+                        <span class="inline-block px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-100 rounded-full uppercase tracking-wide">Documentação Técnica</span>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight">Automação de Monitoramento de Status Pages</h1>
+                        <p class="text-lg text-gray-600 leading-relaxed">
+                            Esta documentação detalha a automação implementada no <strong>n8n</strong> para monitoramento ativo de provedores de serviço externos (SaaS/PaaS). O robô consulta endpoints JSON públicos e notifica grupos do Telegram sobre a saúde dos serviços.
+                        </p>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center md:text-left">
-                            <div>
-                                <span class="text-sm font-semibold text-gray-500 uppercase">Sistemas</span>
-                                <p class="text-lg font-medium text-indigo-700">n8n, Telegram Bot API</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <div class="text-xs font-bold text-gray-400 uppercase mb-1">Sistemas</div>
+                                <div class="font-semibold text-indigo-700">n8n, Telegram API</div>
                             </div>
-                            <div>
-                                <span class="text-sm font-semibold text-gray-500 uppercase">Público-Alvo</span>
-                                <p class="text-lg font-medium">Desenvolvedor, DevOps, Sustentação</p>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <div class="text-xs font-bold text-gray-400 uppercase mb-1">Público-Alvo</div>
+                                <div class="font-semibold text-gray-800">DevOps, Sustentação</div>
                             </div>
-                            <div>
-                                <span class="text-sm font-semibold text-gray-500 uppercase">Tipo</span>
-                                <p class="text-lg font-medium">Melhoria / Nova Funcionalidade</p>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <div class="text-xs font-bold text-gray-400 uppercase mb-1">Tipo</div>
+                                <div class="font-semibold text-green-600">Nova Funcionalidade</div>
                             </div>
                         </div>
                     </div>
                 </section>
+
+                <hr class="border-gray-200">
 
                 <!-- 2. Requisito Funcional -->
-                <section id="requirement" class="scroll-mt-20">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Requisito Funcional</h2>
-                        <p class="text-gray-700 mb-6">Esta seção descreve o problema que a automação se propõe a resolver e o comportamento esperado do sistema, que agora está implementado.</p>
-                        <div class="space-y-4">
+                <section id="requirement" class="scroll-mt-24 md:scroll-mt-10">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Requisito Funcional</h2>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-6 md:p-8 space-y-6">
                             <div>
-                                <h3 class="font-semibold text-lg">Cenário</h3>
-                                <p class="text-gray-600">A equipe de TI necessitava de visibilidade imediata sobre a indisponibilidade de fornecedores críticos (Cloudflare, SAP, Atlassian, etc.) para agilizar a resposta a incidentes e comunicação interna.</p>
+                                <h3 class="flex items-center text-lg font-semibold text-gray-800 mb-2">
+                                    <span class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3 text-sm">1</span>
+                                    Cenário
+                                </h3>
+                                <p class="text-gray-600 ml-11">A equipe de TI necessitava de visibilidade imediata sobre a indisponibilidade de fornecedores críticos (Cloudflare, SAP, Atlassian, etc.) para agilizar a resposta a incidentes.</p>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-lg">Solução Implementada</h3>
-                                <p class="text-gray-600">Foi desenvolvido um fluxo automatizado no n8n que realiza a varredura a cada 15 minutos nas APIs de status públicas dos fornecedores listados.</p>
+                                <h3 class="flex items-center text-lg font-semibold text-gray-800 mb-2">
+                                    <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 text-sm">2</span>
+                                    Solução
+                                </h3>
+                                <p class="text-gray-600 ml-11">Fluxo automatizado no n8n que realiza a varredura a cada 15 minutos nas APIs de status públicas.</p>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-lg">Comportamento do Sistema</h3>
-                                <ul class="list-disc list-inside text-gray-600 space-y-1">
-                                    <li>O sistema coleta o status de 6 serviços críticos simultaneamente.</li>
-                                    <li>Processa os dados para identificar falhas (status diferente de "operacional").</li>
-                                    <li>Envia um relatório consolidado para o Telegram com alertas visuais (🔴 ou 🟢).</li>
-                                </ul>
+                                <h3 class="flex items-center text-lg font-semibold text-gray-800 mb-2">
+                                    <span class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 text-sm">3</span>
+                                    Comportamento
+                                </h3>
+                                <div class="ml-11 bg-gray-50 rounded-lg p-4 text-sm text-gray-700 border border-gray-100">
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Coleta status de 6 serviços simultaneamente.
+                                        </li>
+                                        <li class="flex items-start">
+                                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Processa dados para identificar falhas (`status != operational`).
+                                        </li>
+                                        <li class="flex items-start">
+                                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Envia relatório consolidado para o Telegram.
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
+                <hr class="border-gray-200">
+
                 <!-- 3. Arquitetura do Fluxo -->
-                <section id="architecture" class="scroll-mt-20">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Arquitetura do Fluxo (Workflow)</h2>
-                        <p class="text-gray-700 mb-6">Abaixo está uma representação visual do fluxo de trabalho `Monitor_Status_Services_Telegram` no n8n. Este fluxo foi otimizado para processamento em lote, sem loops, para melhor performance. **Clique em qualquer nó** para ver seus detalhes de configuração.</p>
-                        
-                        <div class="flex flex-col items-center p-4 overflow-x-auto">
+                <section id="architecture" class="scroll-mt-24 md:scroll-mt-10">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Arquitetura do Fluxo</h2>
+                    <p class="text-gray-600 mb-6">Representação visual do workflow `Monitor_Status_Services_Telegram`. <span class="hidden md:inline">Clique nos nós para ver detalhes.</span><span class="md:hidden text-indigo-600 font-medium">Toque nos nós para detalhes.</span></p>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-8 overflow-hidden">
+                        <!-- Container com Scroll Horizontal para Mobile -->
+                        <div class="overflow-x-auto pb-4 custom-scrollbar flex flex-col items-center min-w-[300px]">
+                            
                             <!-- Nó Inicial -->
-                            <div class="workflow-node bg-green-100 border-2 border-green-500 text-green-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="trigger">
-                                <span class="font-semibold">A cada 15 min</span>
-                                <span class="text-xs block">(Schedule Trigger)</span>
+                            <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="trigger">
+                                <div class="text-xs font-bold uppercase text-green-600 mb-1">Trigger</div>
+                                <div class="font-semibold text-sm">A cada 15 min</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 2 -->
-                            <div class="workflow-node bg-blue-100 border-2 border-blue-500 text-blue-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="lista">
-                                <span class="font-semibold">Lista de Serviços</span>
-                                <span class="text-xs block">(Code Node)</span>
+                            <div class="workflow-node bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="lista">
+                                <div class="text-xs font-bold uppercase text-gray-400 mb-1">Code</div>
+                                <div class="font-semibold text-sm">Lista de Serviços</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 3 -->
-                            <div class="workflow-node bg-blue-100 border-2 border-blue-500 text-blue-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="http">
-                                <span class="font-semibold">Checar Status</span>
-                                <span class="text-xs block">(HTTP Request)</span>
+                            <div class="workflow-node bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="http">
+                                <div class="text-xs font-bold uppercase text-gray-400 mb-1">HTTP Request</div>
+                                <div class="font-semibold text-sm">Checar Status</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 4 -->
-                            <div class="workflow-node bg-blue-100 border-2 border-blue-500 text-blue-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="relatorio">
-                                <span class="font-semibold">Gera Relatório</span>
-                                <span class="text-xs block">(Code Node)</span>
+                            <div class="workflow-node bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="relatorio">
+                                <div class="text-xs font-bold uppercase text-gray-400 mb-1">Code</div>
+                                <div class="font-semibold text-sm">Gera Relatório</div>
                             </div>
                             <div class="workflow-arrow"></div>
 
                             <!-- Nó 5 (IF) -->
-                            <div class="workflow-node diamond bg-yellow-100 border-2 border-yellow-500 text-yellow-800 shadow-sm cursor-pointer hover:shadow-md transition-shadow" data-node="if">
-                                <span class="font-semibold">Teve Erro?</span>
+                            <div class="workflow-node diamond bg-yellow-50 border border-yellow-400 text-yellow-900 shadow-sm cursor-pointer transition-all active:scale-95" data-node="if">
+                                <span class="font-bold text-sm">Teve Erro?</span>
                             </div>
                             
                             <!-- Branches do IF -->
-                            <div class="flex w-full max-w-md mt-4">
-                                <!-- Ramo Falso (Esquerda) -->
-                                <div class="w-1/2 px-2 text-center relative if-branch false-branch">
-                                    <span class="text-sm font-semibold text-gray-500 absolute -top-6 left-1/4">False</span>
+                            <div class="flex w-full max-w-md mt-2">
+                                <!-- Ramo Falso -->
+                                <div class="w-1/2 px-1 text-center relative if-branch false-branch">
+                                    <span class="text-xs font-bold text-gray-400 bg-white px-1 absolute -top-7 left-1/4 z-10">False</span>
                                     <div class="workflow-arrow" style="margin-top: -15px;"></div>
-                                    <div class="workflow-node bg-green-100 border-2 border-green-500 text-green-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow mt-4" data-node="sucesso">
-                                        <span class="font-semibold">Telegram Sucesso</span>
-                                        <span class="text-xs block">(Telegram Node)</span>
+                                    <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4 transition-all active:scale-95" data-node="sucesso">
+                                        <div class="text-xs font-bold uppercase text-green-600 mb-1">Telegram</div>
+                                        <div class="font-semibold text-sm">Sucesso</div>
                                     </div>
                                 </div>
-                                <!-- Ramo Verdadeiro (Direita) -->
-                                <div class="w-1/2 px-2 text-center relative if-branch true-branch">
-                                    <span class="text-sm font-semibold text-gray-500 absolute -top-6 right-1/4">True</span>
+                                <!-- Ramo Verdadeiro -->
+                                <div class="w-1/2 px-1 text-center relative if-branch true-branch">
+                                    <span class="text-xs font-bold text-red-400 bg-white px-1 absolute -top-7 right-1/4 z-10">True</span>
                                     <div class="workflow-arrow" style="margin-top: -15px;"></div>
-                                    <div class="workflow-node bg-red-100 border-2 border-red-500 text-red-800 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow mt-4" data-node="alerta">
-                                        <span class="font-semibold">Telegram Alerta</span>
-                                        <span class="text-xs block">(Telegram Node)</span>
+                                    <div class="workflow-node bg-red-50 border border-red-200 hover:border-red-400 text-red-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4 transition-all active:scale-95" data-node="alerta">
+                                        <div class="text-xs font-bold uppercase text-red-600 mb-1">Telegram</div>
+                                        <div class="font-semibold text-sm">Alerta</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <p class="text-center text-xs text-gray-400 mt-4 md:hidden">Arraste horizontalmente se necessário</p>
                     </div>
                 </section>
+
+                <hr class="border-gray-200">
 
                 <!-- 4. Serviços Monitorados -->
-                <section id="services" class="scroll-mt-20">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Serviços Monitorados</h2>
-                        <p class="text-gray-700 mb-6">O fluxo está configurado para monitorar os seguintes 6 provedores de serviços. A arquitetura permite adicionar ou remover serviços facilmente apenas editando o nó "Lista de Serviços".</d>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Card de Serviço -->
-                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 class="font-semibold text-lg text-indigo-800">Cloudflare</h3>
-                                <p class="text-sm text-gray-600 truncate">cloudflarestatus.com</p>
+                <section id="services" class="scroll-mt-24 md:scroll-mt-10">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Serviços Monitorados</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Card -->
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">C</div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900">Cloudflare</h3>
+                                <p class="text-xs text-gray-500 truncate">cloudflarestatus.com</p>
                             </div>
-                            <!-- Card de Serviço -->
-                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 class="font-semibold text-lg text-indigo-800">Infobip</h3>
-                                <p class="text-sm text-gray-600 truncate">status.infobip.com</p>
+                        </div>
+                        <!-- Card -->
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">I</div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900">Infobip</h3>
+                                <p class="text-xs text-gray-500 truncate">status.infobip.com</p>
                             </div>
-                            <!-- Card de Serviço -->
-                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 class="font-semibold text-lg text-indigo-800">Unico</h3>
-                                <p class="text-sm text-gray-600 truncate">status.unico.io</p>
+                        </div>
+                        <!-- Card -->
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">U</div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900">Unico</h3>
+                                <p class="text-xs text-gray-500 truncate">status.unico.io</p>
                             </div>
-                            <!-- Card de Serviço -->
-                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 class="font-semibold text-lg text-indigo-800">Serasa</h3>
-                                <p class="text-sm text-gray-600 truncate">status.allowme.com.br</p>
+                        </div>
+                        <!-- Card -->
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">S</div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900">Serasa</h3>
+                                <p class="text-xs text-gray-500 truncate">status.allowme.com.br</p>
                             </div>
-                            <!-- Card de Serviço -->
-                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 class="font-semibold text-lg text-indigo-800">SAP for Me</h3>
-                                <p class="text-sm text-gray-600 truncate">status.me.sap.com</p>
+                        </div>
+                        <!-- Card -->
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-bold">S</div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900">SAP for Me</h3>
+                                <p class="text-xs text-gray-500 truncate">status.me.sap.com</p>
                             </div>
-                            <!-- Card de Serviço -->
-                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h3 class="font-semibold text-lg text-indigo-800">Atlassian</h3>
-                                <p class="text-sm text-gray-600 truncate">status.atlassian.com</p>
+                        </div>
+                        <!-- Card -->
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">A</div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900">Atlassian</h3>
+                                <p class="text-xs text-gray-500 truncate">status.atlassian.com</p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 5. Lógica Principal (JS) -->
-                <section id="logic" class="scroll-mt-20">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Lógica Principal (Nó: Gera Relatório)</h2>
-                        <p class="text-gray-700 mb-6">O coração da automação é um nó de código JavaScript (ES6) que cruza a lista de serviços com os resultados da API, formata o status de cada um e constrói a mensagem final a ser enviada.</p>
-                        
-                        <div class="bg-gray-900 text-white rounded-lg shadow-lg overflow-hidden">
-                            <div class="flex justify-between items-center px-4 py-2 bg-gray-800">
-                                <span class="text-sm font-medium text-gray-300">JavaScript (n8n Code Node)</span>
-                                <button id="copy-btn" class="text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-md transition-colors">
-                                    Copiar
-                                </button>
+                <hr class="border-gray-200">
+
+                <!-- 5. Lógica Principal -->
+                <section id="logic" class="scroll-mt-24 md:scroll-mt-10">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Lógica Principal (JS)</h2>
+                    <p class="text-gray-600 mb-6">Script JavaScript (ES6) usado no nó "Gera Relatório" para cruzar dados e formatar a mensagem.</p>
+                    
+                    <div class="bg-gray-900 text-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="flex justify-between items-center px-4 py-3 bg-gray-800 border-b border-gray-700">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
                             </div>
-                            <div class="p-4 overflow-x-auto">
-<pre><code id="code-block" class="language-javascript" style="font-family: monospace;">
+                            <button id="copy-btn" class="text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded transition-colors flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                Copiar Código
+                            </button>
+                        </div>
+                        <div class="p-4 overflow-x-auto">
+<pre><code id="code-block" class="language-javascript text-sm font-mono leading-relaxed text-gray-300">
 // 1. Recupera a lista original (nomes definidos manualmente)
 const originals = $('Lista de Serviços').all();
 // 2. Recupera os resultados das requisições HTTP
@@ -371,8 +414,8 @@ originals.forEach((original, index) => {
   if (indicator === 'none' || indicator === 'operational') {
     messageLines.push(`🟢 *${name}:* Operacional`);
   } else if (indicator === 'unknown') {
-    hasError = true; // Considera erro de leitura como alerta
-    messageLines.push(`⚪ *${name}:* Falha na Leitura (Verificar URL)`);
+    hasError = true; 
+    messageLines.push(`⚪ *${name}:* Falha na Leitura`);
   } else {
     hasError = true;
     messageLines.push(`🔴 *${name}:* INSTÁVEL (${description})`);
@@ -380,11 +423,11 @@ originals.forEach((original, index) => {
 });
 
 // 4. Montagem do Relatório Final
-let finalMessage = "📋 *Relatório de Status dos Sistemas*\\n\\n";
+let finalMessage = "📋 *Relatório de Status*\\n\\n";
 finalMessage += messageLines.join('\\n');
 
 if (hasError) {
-  finalMessage += "\\n\\n⚠️ *Atenção:* Instabilidades detectadas. Verifique o impacto nos sistemas internos.";
+  finalMessage += "\\n\\n⚠️ *Atenção:* Instabilidades detectadas.";
 } else {
   finalMessage += "\\n\\n✅ Todos os sistemas monitorados estão estáveis.";
 }
@@ -398,59 +441,34 @@ return [
   }
 ];
 </code></pre>
-                            </div>
                         </div>
                     </div>
                 </section>
                 
-                <!-- 6. Testes e Sustentação -->
-                <section id="sustainment" class="scroll-mt-20">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="text-2xl font-bold text-indigo-900 mb-4">Testes e Sustentação</h2>
-                        <p class="text-gray-700 mb-6">A automação foi validada e segue um plano de sustentação simples para garantir sua longevidade e facilidade de manutenção.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <!-- Coluna Esquerda: Critérios -->
-                            <div>
-                                <h3 class="font-semibold text-lg text-gray-800 mb-3">Critérios de Aceite (Validados)</h3>
-                                <ul class="space-y-3">
-                                    <li class="flex items-start">
-                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        <span class="text-gray-600">Monitora corretamente os 6 serviços listados.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        <span class="text-gray-600">Alertas de sucesso enviados apenas quando 100% dos serviços estão OK.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        <span class="text-gray-600">Alertas de falha detalham o serviço e o motivo.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        <span class="text-gray-600">O fluxo não trava em caso de erro 404/Timeout de uma das APIs.</span>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- Coluna Direita: Sustentação -->
-                            <div>
-                                <h3 class="font-semibold text-lg text-gray-800 mb-3">Plano de Sustentação</h3>
-                                <p class="text-gray-600 mb-2"><strong>Monitoramento do Robô:</strong></p>
-                                <ul class="list-disc list-inside text-gray-600 mb-4">
-                                    <li>Verificar logs de execução do n8n semanalmente para garantir que o agendamento está ativo.</li>
-                                </ul>
-                                <p class="text-gray-600 mb-2"><strong>Atualização de Serviços:</strong></p>
-                                <p class="text-gray-600 mb-2">Para adicionar novos fornecedores, basta editar o nó "Lista de Serviços" e adicionar um novo objeto JSON no padrão:</p>
-                                <div class="bg-gray-100 p-3 rounded border border-gray-300">
-<pre class="text-sm text-gray-800">
-{
-  json: {
-    name: "Novo Serviço",
-    url: "https://url-do-status/api/v2/status.json"
-  }
-}
-</pre>
-                                </div>
-                            </div>
+                <hr class="border-gray-200">
+
+                <!-- 6. Sustentação -->
+                <section id="sustainment" class="scroll-mt-24 md:scroll-mt-10">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Sustentação</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-green-50 p-6 rounded-xl border border-green-100">
+                            <h3 class="font-bold text-green-800 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Checklist de Validação
+                            </h3>
+                            <ul class="space-y-3 text-sm text-green-800">
+                                <li>✓ Monitoramento dos 6 serviços ativo.</li>
+                                <li>✓ Alertas de sucesso apenas com 100% de uptime.</li>
+                                <li>✓ Resiliência a falhas de API (404/500) testada.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+                            <h3 class="font-bold text-indigo-800 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                Manutenção
+                            </h3>
+                            <p class="text-sm text-indigo-800 mb-2">Para adicionar um serviço:</p>
+                            <code class="block bg-white px-2 py-1 rounded text-xs border border-indigo-200 text-indigo-600 font-mono">{ json: { name: "Novo", url: "..." } }</code>
                         </div>
                     </div>
                 </section>
@@ -458,81 +476,74 @@ return [
         </main>
     </div>
 
-    <!-- Modal Estrutura -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-60 z-40 hidden transition-opacity duration-300"></div>
-    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-        <div id="modal-content" class="bg-white w-full max-w-lg rounded-lg shadow-xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
-            <div class="flex justify-between items-center p-4 border-b border-gray-200">
-                <h3 id="modal-title" class="text-xl font-semibold text-indigo-900"></h3>
-                <button id="modal-close" class="text-gray-400 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <!-- Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden transition-opacity duration-300 backdrop-blur-sm"></div>
+    <div id="modal" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4 hidden">
+        <div id="modal-content" class="bg-white w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 translate-y-full md:translate-y-0 md:scale-95 md:opacity-0">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
+                <h3 id="modal-title" class="text-lg font-bold text-gray-900"></h3>
+                <button id="modal-close" class="p-1 rounded-full hover:bg-gray-200 transition-colors">
+                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div id="modal-body" class="p-6 text-gray-700 space-y-3">
-                <!-- Conteúdo dinâmico aqui -->
+            <div id="modal-body" class="p-6 text-gray-600 space-y-4 max-h-[70vh] overflow-y-auto">
+                <!-- Conteúdo -->
+            </div>
+            <div class="p-4 border-t border-gray-100 bg-gray-50 md:hidden">
+                <button id="modal-close-btn-bottom" class="w-full bg-gray-200 text-gray-800 font-semibold py-3 rounded-lg">Fechar</button>
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-            // --- Lógica do Menu Mobile ---
             const menuBtn = document.getElementById('menu-btn');
-            const mobileMenu = document.getElementById('mobile-menu');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const sidebar = document.getElementById('sidebar');
             const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-            const mainContent = document.getElementById('main-content');
-            const navLinks = document.querySelectorAll('#mobile-menu .nav-link');
+            const navLinks = document.querySelectorAll('.nav-link');
 
-            function toggleMenu() {
-                mobileMenu.classList.toggle('hidden');
-                mobileMenu.classList.toggle('-translate-x-full');
-                mobileMenuOverlay.classList.toggle('hidden');
+            function openMenu() {
+                sidebar.classList.remove('-translate-x-full');
+                mobileMenuOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Evita scroll no body
             }
 
-            menuBtn.addEventListener('click', toggleMenu);
-            mobileMenuOverlay.addEventListener('click', toggleMenu);
+            function closeMenu() {
+                sidebar.classList.add('-translate-x-full');
+                mobileMenuOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            menuBtn.addEventListener('click', openMenu);
+            closeMenuBtn.addEventListener('click', closeMenu);
+            mobileMenuOverlay.addEventListener('click', closeMenu);
+
             navLinks.forEach(link => {
-                link.addEventListener('click', toggleMenu);
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) { // Só fecha no mobile
+                        closeMenu();
+                    }
+                });
             });
 
-            // --- Lógica do Modal ---
+            // --- Modal Logic ---
             const modal = document.getElementById('modal');
             const modalOverlay = document.getElementById('modal-overlay');
             const modalContent = document.getElementById('modal-content');
             const modalCloseBtn = document.getElementById('modal-close');
+            const modalCloseBtnBottom = document.getElementById('modal-close-btn-bottom');
             const modalTitle = document.getElementById('modal-title');
             const modalBody = document.getElementById('modal-body');
 
             const nodeData = {
-                trigger: {
-                    title: "Nó: A cada 15 min (Schedule Trigger)",
-                    details: "<p>Este é o gatilho que inicia o fluxo de trabalho.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Agendado</li><li><strong>Intervalo:</strong> A cada 15 minutos</li><li><strong>Função:</strong> Garante que o monitoramento seja executado periodicamente sem intervenção manual.</li></ul>"
-                },
-                lista: {
-                    title: "Nó: Lista de Serviços (Code)",
-                    details: "<p>Este nó define a lista de todos os serviços que serão monitorados. Ele retorna um Array de objetos JSON.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Code (JavaScript)</li><li><strong>Função:</strong> Manter uma lista de configuração centralizada.</li><li><strong>Saída:</strong> `[{ json: { name: 'Cloudflare', url: '...' } }, ...]`</li></ul><p class='mt-2 text-sm text-gray-500'>Para adicionar um novo serviço, basta editar este nó.</p>"
-                },
-                http: {
-                    title: "Nó: Checar Status (HTTP Request)",
-                    details: "<p>Este nó acessa a URL de cada serviço da lista para obter o status atual.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> HTTP Request</li><li><strong>Método:</strong> GET</li><li><strong>URL:</strong> Dinâmica (`{{ $json.url }}`)</li><li><strong>Resiliência:</strong> A opção <strong>'On Error: Continue'</strong> está ativada. Isso é crucial para que o fluxo não pare se uma das URLs falhar (ex: 404 ou 500).</li></ul>"
-                },
-                relatorio: {
-                    title: "Nó: Gera Relatório (Code)",
-                    details: "<p>Este é o cérebro da automação. Ele roda após todas as consultas HTTP terminarem.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Code (JavaScript)</li><li><strong>Função:</strong> Cruza os dados da lista original com os resultados das APIs.</li><li><strong>Lógica:</strong> Mapeia os status (operational, minor, critical) para emojis (🟢, 🔴, ⚪) e constrói a mensagem final em Markdown.</li><li><strong>Saída:</strong> Um objeto JSON com `has_error` (boolean) e `message` (string).</li></ul>"
-                },
-                if: {
-                    title: "Nó: Teve Erro? (IF)",
-                    details: "<p>Este nó funciona como um 'sinaleiro', direcionando o fluxo com base no resultado do relatório.</p><ul class='list-disc list-inside mt-2'><li><strong>Condição:</strong> Verifica o valor booleano de `{{ $json.has_error }}`.</li><li><strong>Ramo True:</strong> Ativado se `has_error` for verdadeiro.</li><li><strong>Ramo False:</strong> Ativado se `has_error` for falso.</li></ul>"
-                },
-                alerta: {
-                    title: "Nó: Telegram Alerta (Telegram)",
-                    details: "<p>Este nó é ativado apenas se houver uma instabilidade detectada.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Telegram</li><li><strong>Ação:</strong> Envia a mensagem de erro (formatada pelo nó 'Gera Relatório') para o Chat ID do grupo.</li><li><strong>Parse Mode:</strong> Markdown (para emojis e negrito).</li></ul>"
-                },
-                sucesso: {
-                    title: "Nó: Telegram Sucesso (Telegram)",
-                    details: "<p>Este nó é ativado apenas se todos os serviços estiverem operacionais.</p><ul class='list-disc list-inside mt-2'><li><strong>Tipo:</strong> Telegram</li><li><strong>Ação:</strong> Envia a mensagem 'Todos os sistemas estáveis' para o Chat ID do grupo.</li><li><strong>Parse Mode:</strong> Markdown.</li></ul>"
-                }
+                trigger: { title: "Nó: A cada 15 min", details: "<p>Gatilho agendado (Schedule Trigger).</p><p class='mt-2'>Garante que o monitoramento rode periodicamente sem intervenção.</p>" },
+                lista: { title: "Nó: Lista de Serviços", details: "<p>Define a lista de serviços JSON.</p><p class='mt-2 text-sm'>Para adicionar um serviço, edite o Array JSON neste nó.</p>" },
+                http: { title: "Nó: Checar Status", details: "<p>Faz requisições GET para as APIs.</p><p class='mt-2 text-sm bg-yellow-50 p-2 rounded text-yellow-800 border border-yellow-200'><strong>Importante:</strong> A opção 'On Error: Continue' deve estar ativa para não travar o fluxo.</p>" },
+                relatorio: { title: "Nó: Gera Relatório", details: "<p>Script JS que cruza os dados.</p><p class='mt-2'>Transforma códigos de status (none, major, critical) em emojis visuais.</p>" },
+                if: { title: "Nó: Teve Erro?", details: "<p>Condicional simples.</p><p class='mt-2'>Se <code>has_error == true</code>, vai para Alerta. Se não, Sucesso.</p>" },
+                alerta: { title: "Nó: Telegram Alerta", details: "<p>Envia mensagem formatada com falhas.</p>" },
+                sucesso: { title: "Nó: Telegram Sucesso", details: "<p>Envia mensagem de 'Tudo OK'.</p>" }
             };
 
             function openModal(title, content) {
@@ -540,23 +551,25 @@ return [
                 modalBody.innerHTML = content;
                 modal.classList.remove('hidden');
                 modalOverlay.classList.remove('hidden');
+                // Animação de entrada
                 setTimeout(() => {
-                    modalContent.classList.remove('scale-95', 'opacity-0');
-                    modalContent.classList.add('scale-100', 'opacity-100');
+                    modalContent.classList.remove('translate-y-full', 'md:scale-95', 'md:opacity-0');
+                    modalContent.classList.add('translate-y-0', 'md:scale-100', 'md:opacity-100');
                 }, 10);
             }
 
             function closeModal() {
-                modalContent.classList.add('scale-95', 'opacity-0');
-                modalContent.classList.remove('scale-100', 'opacity-100');
+                modalContent.classList.remove('translate-y-0', 'md:scale-100', 'md:opacity-100');
+                modalContent.classList.add('translate-y-full', 'md:scale-95', 'md:opacity-0');
                 setTimeout(() => {
                     modal.classList.add('hidden');
                     modalOverlay.classList.add('hidden');
                 }, 300);
             }
 
-            modalCloseBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', closeModal);
+            [modalCloseBtn, modalCloseBtnBottom, modalOverlay].forEach(el => {
+                if(el) el.addEventListener('click', closeModal);
+            });
 
             document.querySelectorAll('.workflow-node').forEach(node => {
                 const nodeKey = node.getAttribute('data-node');
@@ -567,62 +580,31 @@ return [
                 }
             });
 
-            // --- Lógica do Botão Copiar ---
+            // --- Copy Logic ---
             const copyBtn = document.getElementById('copy-btn');
             const codeBlock = document.getElementById('code-block');
 
             copyBtn.addEventListener('click', () => {
                 const textToCopy = codeBlock.innerText;
-                
-                // Usando 'document.execCommand' para compatibilidade em iFrames
                 const textarea = document.createElement('textarea');
                 textarea.value = textToCopy;
-                textarea.style.position = 'fixed'; // Evita rolagem
+                textarea.style.position = 'fixed';
                 textarea.style.left = '-9999px';
                 document.body.appendChild(textarea);
                 textarea.select();
                 try {
                     document.execCommand('copy');
-                    copyBtn.textContent = 'Copiado!';
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copiado!`;
+                    copyBtn.classList.replace('bg-gray-700', 'bg-green-600');
                     setTimeout(() => {
-                        copyBtn.textContent = 'Copiar';
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.classList.replace('bg-green-600', 'bg-gray-700');
                     }, 2000);
                 } catch (err) {
-                    console.error('Falha ao copiar:', err);
-                    copyBtn.textContent = 'Erro';
+                    console.error('Erro ao copiar', err);
                 }
                 document.body.removeChild(textarea);
-            });
-
-            // --- Lógica de Scroll Spy (Navegação Ativa) ---
-            const sections = document.querySelectorAll('section');
-            const desktopNavLinks = document.querySelectorAll('aside .nav-link');
-            const mobileNavLinks = document.querySelectorAll('#mobile-menu .nav-link');
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.getAttribute('id');
-                        const activeLinkSelector = `.nav-link[href="#${id}"]`;
-                        
-                        desktopNavLinks.forEach(link => {
-                            link.classList.remove('active');
-                            if (link.getAttribute('href') === `#${id}`) {
-                                link.classList.add('active');
-                            }
-                        });
-                        mobileNavLinks.forEach(link => {
-                            link.classList.remove('active');
-                            if (link.getAttribute('href') === `#${id}`) {
-                                link.classList.add('active');
-                            }
-                        });
-                    }
-                });
-            }, { rootMargin: '-30% 0px -70% 0px', threshold: 0.1 }); // Ativa quando a seção está no terço superior da tela
-
-            sections.forEach(section => {
-                observer.observe(section);
             });
         });
     </script>
