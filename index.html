@@ -3,581 +3,535 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doc Interativa | Monitor Universal Multi-Cloud</title>
+    <title>Doc Técnica v5.0 | Monitor Universal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Application Structure Plan: SPA Responsiva com Copyright no rodapé. -->
+    <!-- PrismJS para highlight de código -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, sans-serif; }
         
-        /* --- Estilos do Diagrama de Fluxo --- */
-        .workflow-arrow {
-            position: relative;
-            height: 30px;
-            width: 2px;
-            background-color: #9ca3af; /* gray-400 */
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .workflow-arrow::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: -4px;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid #9ca3af;
-        }
+        .workflow-arrow { position: relative; height: 30px; width: 2px; background-color: #9ca3af; margin: 0 auto; }
+        .workflow-arrow::after { content: ''; position: absolute; bottom: -1px; left: -4px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #9ca3af; }
         
-        /* Nó Diamante (Decisão) */
-        .workflow-node.diamond {
-            width: 140px;
-            height: 80px;
-            transform: rotate(45deg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 20px auto;
-        }
-        @media (min-width: 768px) {
-            .workflow-node.diamond {
-                width: 180px;
-                height: 100px;
-            }
-        }
-        .workflow-node.diamond span {
-            transform: rotate(-45deg);
-            max-width: 120px;
-            text-align: center;
-            font-size: 0.9rem;
-            line-height: 1.1;
-        }
+        .workflow-node.diamond { width: 140px; height: 80px; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; margin: 20px auto; }
+        .workflow-node.diamond span { transform: rotate(-45deg); max-width: 120px; text-align: center; font-size: 0.9rem; }
 
-        /* Linhas de Ramificação */
-        .if-branch {
-            position: relative;
-            width: 100%;
-        }
-        .if-branch::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 50%;
-            height: 2px;
-            background-color: #9ca3af;
-        }
-        .if-branch.true-branch::before { left: 50%; }
-        .if-branch.false-branch::before { right: 50%; width: 50%; left: 0; }
+        .if-branch { position: relative; width: 100%; }
+        .if-branch::before { content: ''; position: absolute; top: 50%; width: 50%; height: 2px; background-color: #9ca3af; }
+        .if-branch.true-branch::before { left: 50%; } .if-branch.false-branch::before { right: 50%; left: 0; }
+        .if-branch .workflow-arrow { position: absolute; top: -15px; }
+        .if-branch.true-branch .workflow-arrow { right: 0; } .if-branch.false-branch .workflow-arrow { left: 0; }
+
+        .nav-link.active { background-color: #f0f9ff; color: #0284c7; border-right: 3px solid #0284c7; font-weight: 600; }
         
-        .if-branch .workflow-arrow {
-            position: absolute;
-            top: -15px;
-        }
-        .if-branch.true-branch .workflow-arrow { right: 0; left: auto; }
-        .if-branch.false-branch .workflow-arrow { left: 0; right: auto; }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .nav-link.active {
-            background-color: #f0f9ff; /* sky-50 */
-            color: #0369a1; /* sky-700 */
-            font-weight: 600;
-            border-right: 3px solid #0369a1;
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 h-full">
 
     <div class="flex h-full flex-col md:flex-row">
         
-        <!-- Header Mobile -->
-        <header class="md:hidden sticky top-0 bg-white shadow-sm z-30 w-full flex items-center justify-between p-4 border-b border-slate-200">
-            <div class="flex items-center">
-                <span class="bg-sky-600 text-white p-1.5 rounded-md mr-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                </span>
-                <h2 class="text-lg font-bold text-slate-900">Monitor Universal</h2>
-            </div>
-            <button id="menu-btn" class="p-2 rounded-md text-slate-600 hover:bg-slate-100">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-        </header>
-
-        <!-- Overlay Mobile -->
-        <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300 md:hidden backdrop-blur-sm"></div>
-
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-screen md:flex-shrink-0 overflow-y-auto">
-            <div class="p-6 hidden md:flex items-center border-b border-slate-100">
-                <span class="bg-sky-600 text-white p-1.5 rounded-md mr-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                </span>
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">Monitor Cloud</h2>
-                    <p class="text-xs text-slate-500 font-medium">Doc. Técnica v2.1</p>
-                </div>
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300 md:static md:h-screen overflow-y-auto flex flex-col">
+            <div class="p-6 border-b border-slate-100">
+                <h2 class="text-xl font-bold text-slate-900">Monitor v5.0</h2>
+                <p class="text-xs text-slate-500 font-medium">Documentação Técnica</p>
             </div>
-            
-            <div class="p-4 md:hidden flex justify-between items-center border-b border-slate-100 bg-slate-50">
-                <span class="font-semibold text-slate-700">Menu</span>
-                <button id="close-menu-btn" class="text-slate-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-
-            <nav class="p-4 space-y-1">
-                <a href="#overview" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Visão Geral</a>
-                <a href="#requirement" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Requisito Multi-Cloud</a>
-                <a href="#architecture" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Arquitetura Universal</a>
-                <a href="#services" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Serviços Monitorados</a>
-                <a href="#logic" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Código "Cérebro"</a>
-                <a href="#sustainment" class="nav-link group flex items-center px-3 py-2.5 text-sm font-medium text-slate-600 rounded-r-md hover:bg-sky-50 hover:text-sky-600 transition-colors">Sustentação</a>
+            <nav class="p-4 space-y-1 flex-1">
+                <a href="#overview" class="nav-link block px-3 py-2 text-sm text-slate-600 rounded-r-md hover:bg-sky-50 transition">Visão Geral</a>
+                <a href="#requirements" class="nav-link block px-3 py-2 text-sm text-slate-600 rounded-r-md hover:bg-sky-50 transition">Requisitos</a>
+                <a href="#workflow" class="nav-link block px-3 py-2 text-sm text-slate-600 rounded-r-md hover:bg-sky-50 transition">Fluxograma Técnico</a>
+                <a href="#services" class="nav-link block px-3 py-2 text-sm text-slate-600 rounded-r-md hover:bg-sky-50 transition">Serviços Monitorados</a>
+                <a href="#sourcecode" class="nav-link block px-3 py-2 text-sm text-slate-600 rounded-r-md hover:bg-sky-50 transition">Código Fonte</a>
+                <a href="#sustainment" class="nav-link block px-3 py-2 text-sm text-slate-600 rounded-r-md hover:bg-sky-50 transition">Sustentação</a>
             </nav>
+            <div class="p-4 border-t border-slate-100">
+                <a href="https://t.me/+JjewiS3mTos4Y2I5" target="_blank" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 transition shadow-sm">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.196-2.983 5.532-4.927c.241-.214-.053-.332-.373-.121l-6.836 4.235-2.916-.917c-.633-.202-.643-.635.133-.954l11.4-4.393c.527-.197.988.119.812.965z"/></svg>
+                    Grupo Telegram
+                </a>
+            </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 h-[calc(100vh-64px)] md:h-screen overflow-y-auto scroll-smooth">
-            <div class="max-w-5xl mx-auto p-4 md:p-10 space-y-16 pb-10">
-                
-                <!-- 1. Visão Geral -->
-                <section id="overview" class="scroll-mt-24 md:scroll-mt-10">
-                    <div class="space-y-4">
-                        <span class="inline-block px-3 py-1 text-xs font-semibold text-sky-600 bg-sky-100 rounded-full uppercase tracking-wide">Documentação Técnica</span>
-                        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">Monitoramento Universal Multi-Cloud</h1>
-                        <p class="text-lg text-slate-600 leading-relaxed">
-                            Documentação da nova arquitetura do robô de monitoramento (v2.1). Esta versão implementa um <strong>"Tradutor Universal"</strong> capaz de consumir e normalizar dados de status de diferentes provedores (Google, Azure, Cloudflare, SAP, etc.) que utilizam padrões distintos (JSON, XML/RSS).
-                        </p>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">Capacidade</div>
-                                <div class="font-semibold text-sky-700">Multi-Formato (JSON/XML)</div>
-                            </div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">Status</div>
-                                <div class="font-semibold text-emerald-600">Produção</div>
-                            </div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                                <div class="text-xs font-bold text-slate-400 uppercase mb-1">Nota</div>
-                                <div class="font-semibold text-amber-600">AWS Inativa (Code-Only)</div>
-                            </div>
-                        </div>
+        <!-- Main -->
+        <main class="flex-1 h-[calc(100vh-64px)] md:h-screen overflow-y-auto p-4 md:p-10 pb-20 scroll-smooth">
+            
+            <!-- Overview -->
+            <section id="overview" class="mb-16 scroll-mt-10">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h1 class="text-3xl font-bold text-slate-900">Monitoramento Universal Multi-Cloud</h1>
+                    <div class="mt-4 md:mt-0 flex space-x-2">
+                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">Produção</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">v5.0</span>
                     </div>
-                </section>
+                </div>
+                <p class="text-slate-600 text-lg leading-relaxed">
+                    Solução de monitoramento automatizado baseada em n8n que centraliza o status de disponibilidade de múltiplos provedores de nuvem e serviços SaaS. A arquitetura utiliza um "Tradutor Universal" capaz de ingerir dados em JSON, XML/RSS e Listas, normalizando-os para um relatório unificado no Telegram.
+                </p>
+            </section>
 
-                <hr class="border-slate-200">
+            <hr class="border-slate-200 mb-16">
 
-                <!-- 2. Requisito -->
-                <section id="requirement" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Requisito Multi-Cloud</h2>
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-6 md:p-8 space-y-6">
-                            <div>
-                                <h3 class="flex items-center text-lg font-semibold text-slate-800 mb-2">
-                                    Desafio Técnico
-                                </h3>
-                                <p class="text-slate-600">O monitoramento abrange provedores de nuvem e SaaS que não seguem um padrão único de Status Page, exigindo suporte a múltiplos formatos:</p>
-                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                                        <span class="font-bold text-slate-700">Google Cloud</span>
-                                        <span class="text-sm text-slate-500 block">Retorna uma Lista JSON (`[]`).</span>
-                                    </div>
-                                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                                        <span class="font-bold text-slate-700">Azure (Microsoft)</span>
-                                        <span class="text-sm text-slate-500 block">Retorna XML (RSS Feed).</span>
-                                    </div>
-                                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                                        <span class="font-bold text-slate-700">SaaS (Atlassian/SAP/Outros)</span>
-                                        <span class="text-sm text-slate-500 block">Retorna Objeto JSON (`{status:...}`).</span>
-                                    </div>
-                                    <div class="p-3 bg-slate-50 rounded border border-slate-200 opacity-75">
-                                        <span class="font-bold text-slate-500">AWS (Amazon)</span>
-                                        <span class="text-sm text-slate-400 block">Código presente, mas comentado (Inativo).</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Requisitos -->
+            <section id="requirements" class="mb-16 scroll-mt-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Requisitos Funcionais
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3">Objetivos Principais</h3>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex items-start"><span class="text-sky-500 mr-2">•</span> Monitorar proativamente 8+ serviços críticos.</li>
+                            <li class="flex items-start"><span class="text-sky-500 mr-2">•</span> Detectar incidentes em menos de 15 minutos.</li>
+                            <li class="flex items-start"><span class="text-sky-500 mr-2">•</span> Centralizar alertas em um canal único (Telegram).</li>
+                        </ul>
                     </div>
-                </section>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3">Regras de Negócio</h3>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex items-start"><span class="text-sky-500 mr-2">•</span> <strong>Normalização:</strong> Converter XML (Azure), JSON Array (Google) e JSON Object (SaaS) para um padrão comum.</li>
+                            <li class="flex items-start"><span class="text-sky-500 mr-2">•</span> <strong>Resiliência:</strong> O fluxo não deve parar se um serviço específico falhar (Erro 404/500).</li>
+                            <li class="flex items-start"><span class="text-sky-500 mr-2">•</span> <strong>Segurança:</strong> Utilizar User-Agents adequados para evitar bloqueios de WAF.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
 
-                <hr class="border-slate-200">
+            <!-- Workflow -->
+            <section id="workflow" class="mb-16 scroll-mt-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">Fluxograma Técnico</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 overflow-x-auto flex flex-col items-center">
+                    <!-- Trigger -->
+                    <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="trigger">
+                        <div class="text-xs font-bold uppercase text-green-600 mb-1">Trigger</div>
+                        <div class="font-semibold text-sm">A cada 15 min</div>
+                    </div>
+                    <div class="workflow-arrow"></div>
 
-                <!-- 3. Arquitetura -->
-                <section id="architecture" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Arquitetura Universal</h2>
-                    <p class="text-slate-600 mb-6">Abaixo está o fluxo atualizado. O diferencial é o tratamento de dados como <strong>Texto Bruto</strong> no HTTP Request para evitar erros de parseamento do XML da Azure.</p>
-                    
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-8 overflow-hidden">
-                        <div class="overflow-x-auto pb-4 custom-scrollbar flex flex-col items-center min-w-[300px]">
-                            
-                            <!-- Nó 1 -->
-                            <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="trigger">
-                                <div class="text-xs font-bold uppercase text-green-600 mb-1">Trigger</div>
-                                <div class="font-semibold text-sm">A cada 15 min</div>
-                            </div>
-                            <div class="workflow-arrow"></div>
-
-                            <!-- Nó 2 -->
-                            <div class="workflow-node bg-white border border-slate-300 hover:border-sky-400 text-slate-800 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="lista">
+                    <!-- Divisão -->
+                    <div class="flex space-x-8 w-full justify-center">
+                        <!-- Caminho Geral -->
+                        <div class="flex flex-col items-center">
+                            <div class="workflow-node bg-white border border-slate-300 hover:border-sky-500 text-slate-800 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer" data-node="lista">
                                 <div class="text-xs font-bold uppercase text-slate-400 mb-1">Code</div>
-                                <div class="font-semibold text-sm">Lista Big Techs</div>
+                                <div class="font-semibold text-sm">Lista Geral</div>
                             </div>
                             <div class="workflow-arrow"></div>
-
-                            <!-- Nó 3 -->
-                            <div class="workflow-node bg-amber-50 border border-amber-300 hover:border-amber-500 text-amber-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="http">
+                            <div class="workflow-node bg-amber-50 border border-amber-300 hover:border-amber-500 text-amber-900 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer" data-node="http">
                                 <div class="text-xs font-bold uppercase text-amber-600 mb-1">HTTP Request</div>
-                                <div class="font-semibold text-sm">Baixar Dados (Auto Decode)</div>
-                                <div class="text-[10px] text-amber-700 mt-1">(Response Format: Text)</div>
+                                <div class="font-semibold text-sm">Baixar Dados (Text)</div>
                             </div>
                             <div class="workflow-arrow"></div>
-
-                            <!-- Nó 4 -->
-                            <div class="workflow-node bg-indigo-50 border border-indigo-300 hover:border-indigo-500 text-indigo-900 rounded-lg p-3 w-56 text-center shadow-sm cursor-pointer transition-all active:scale-95" data-node="cerebro">
-                                <div class="text-xs font-bold uppercase text-indigo-600 mb-1">Code (JS)</div>
-                                <div class="font-semibold text-sm">Cérebro Multi-Cloud</div>
+                            <div class="workflow-node bg-indigo-50 border border-indigo-300 hover:border-indigo-500 text-indigo-900 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer" data-node="norm_geral">
+                                <div class="text-xs font-bold uppercase text-indigo-600 mb-1">Code</div>
+                                <div class="font-semibold text-sm">Normaliza Geral</div>
                             </div>
-                            <div class="workflow-arrow"></div>
+                        </div>
 
-                            <!-- Nó 5 (IF) -->
-                            <div class="workflow-node diamond bg-yellow-50 border border-yellow-400 text-yellow-900 shadow-sm cursor-pointer transition-all active:scale-95" data-node="if">
-                                <span class="font-bold text-sm">Teve Erro?</span>
+                        <!-- Caminho AWS -->
+                        <div class="flex flex-col items-center">
+                            <div class="workflow-node bg-slate-100 border border-slate-300 border-dashed text-slate-500 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer opacity-75" data-node="mock">
+                                <div class="text-xs font-bold uppercase text-slate-400 mb-1">Code (Mock)</div>
+                                <div class="font-semibold text-sm">Bypass AWS</div>
                             </div>
-                            
-                            <!-- Branches -->
-                            <div class="flex w-full max-w-md mt-2">
-                                <div class="w-1/2 px-1 text-center relative if-branch false-branch">
-                                    <span class="text-xs font-bold text-slate-400 bg-white px-1 absolute -top-7 left-1/4 z-10">False</span>
-                                    <div class="workflow-arrow" style="margin-top: -15px;"></div>
-                                    <div class="workflow-node bg-green-50 border border-green-200 hover:border-green-400 text-green-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4" data-node="sucesso">
-                                        <div class="text-xs font-bold uppercase text-green-600 mb-1">Telegram</div>
-                                        <div class="font-semibold text-sm">Sucesso</div>
-                                    </div>
-                                </div>
-                                <div class="w-1/2 px-1 text-center relative if-branch true-branch">
-                                    <span class="text-xs font-bold text-red-400 bg-white px-1 absolute -top-7 right-1/4 z-10">True</span>
-                                    <div class="workflow-arrow" style="margin-top: -15px;"></div>
-                                    <div class="workflow-node bg-red-50 border border-red-200 hover:border-red-400 text-red-900 rounded-lg p-3 shadow-sm cursor-pointer mt-4" data-node="alerta">
-                                        <div class="text-xs font-bold uppercase text-red-600 mb-1">Telegram</div>
-                                        <div class="font-semibold text-sm">Alerta</div>
-                                    </div>
-                                </div>
+                            <div class="workflow-arrow border-dashed"></div>
+                            <div class="workflow-node bg-indigo-50 border border-indigo-300 hover:border-indigo-500 text-indigo-900 rounded-lg p-3 w-48 text-center shadow-sm cursor-pointer" data-node="norm_aws">
+                                <div class="text-xs font-bold uppercase text-indigo-600 mb-1">Code</div>
+                                <div class="font-semibold text-sm">Normaliza AWS</div>
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <hr class="border-slate-200">
+                    <div class="workflow-arrow"></div>
 
-                <!-- 4. Serviços -->
-                <section id="services" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Serviços Monitorados</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Azure -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-sky-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Azure</h3>
-                                <p class="text-xs text-slate-500">XML/RSS</p>
-                            </div>
-                        </div>
-                        <!-- Google -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-blue-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Google Cloud</h3>
-                                <p class="text-xs text-slate-500">JSON Array</p>
-                            </div>
-                        </div>
-                        <!-- Cloudflare -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Cloudflare</h3>
-                                <p class="text-xs text-slate-500">JSON Atlassian</p>
-                            </div>
-                        </div>
-                        <!-- Infobip -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Infobip</h3>
-                                <p class="text-xs text-slate-500">JSON Atlassian</p>
-                            </div>
-                        </div>
-                        <!-- Unico -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Unico</h3>
-                                <p class="text-xs text-slate-500">JSON Atlassian</p>
-                            </div>
-                        </div>
-                        <!-- Serasa -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Serasa</h3>
-                                <p class="text-xs text-slate-500">JSON Atlassian</p>
-                            </div>
-                        </div>
-                        <!-- SAP -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">SAP for Me</h3>
-                                <p class="text-xs text-slate-500">JSON Atlassian</p>
-                            </div>
-                        </div>
-                        <!-- Atlassian -->
-                        <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center space-x-3 border-l-4 border-l-orange-500">
-                            <div class="min-w-0">
-                                <h3 class="font-semibold text-slate-900">Atlassian</h3>
-                                <p class="text-xs text-slate-500">JSON Atlassian</p>
-                            </div>
-                        </div>
+                    <!-- Merge -->
+                    <div class="workflow-node bg-purple-50 border border-purple-300 text-purple-900 rounded-lg p-3 w-64 text-center shadow-sm cursor-pointer" data-node="merge">
+                        <div class="text-xs font-bold uppercase text-purple-600 mb-1">Merge (Append)</div>
+                        <div class="font-semibold text-sm">Juntar Resultados</div>
                     </div>
-                    <div class="mt-4 text-sm text-slate-500 bg-slate-50 p-3 rounded border border-slate-200 inline-block">
-                        <strong>Nota AWS:</strong> O endpoint <code>data.json</code> da Amazon está presente no código, mas comentado (desativado) devido a bloqueios de WAF.
+                    <div class="workflow-arrow"></div>
+
+                    <!-- Final -->
+                    <div class="workflow-node bg-indigo-50 border border-indigo-300 hover:border-indigo-500 text-indigo-900 rounded-lg p-3 w-64 text-center shadow-sm cursor-pointer" data-node="cerebro">
+                        <div class="text-xs font-bold uppercase text-indigo-600 mb-1">Code</div>
+                        <div class="font-semibold text-sm">Gera Relatório Final</div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <hr class="border-slate-200">
-
-                <!-- 5. Lógica JS -->
-                <section id="logic" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Código "Cérebro Multi-Cloud"</h2>
-                    <p class="text-slate-600 mb-6">Este é o script que normaliza os dados. Note como ele verifica se o dado recebido é JSON ou XML (para Azure) antes de processar.</p>
-                    
-                    <div class="bg-slate-900 text-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="flex justify-between items-center px-4 py-3 bg-slate-800 border-b border-slate-700">
-                            <span class="text-xs font-mono text-slate-400">JavaScript (Code Node)</span>
-                            <button id="copy-btn" class="text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded transition-colors">
-                                Copiar Código
-                            </button>
+            <!-- Serviços Monitorados -->
+            <section id="services" class="mb-16 scroll-mt-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">Serviços Monitorados</h2>
+                <p class="text-slate-600 mb-6 text-sm">Clique nos cartões para visualizar o endpoint técnico e detalhes de integração.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Google Cloud -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-blue-500" onclick="window.openServiceModal('google')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Google Cloud</h3>
+                            <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">JSON Array</span>
                         </div>
-                        <div class="p-4 overflow-x-auto">
-<pre><code id="code-block" class="language-javascript text-sm font-mono leading-relaxed text-slate-300">
-const originals = $('Lista Big Techs').all();
+                        <p class="text-xs text-slate-500 mt-1">Infraestrutura Cloud</p>
+                    </div>
+
+                    <!-- Azure -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-sky-500" onclick="window.openServiceModal('azure')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Azure</h3>
+                            <span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full">XML/RSS</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Microsoft Cloud Services</p>
+                    </div>
+
+                    <!-- AWS -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-slate-400 opacity-75" onclick="window.openServiceModal('aws')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-600">AWS (Amazon)</h3>
+                            <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">Inativo</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Bloqueio WAF (Pausado)</p>
+                    </div>
+
+                    <!-- Cloudflare -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-orange-500" onclick="window.openServiceModal('cloudflare')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Cloudflare</h3>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Atlassian</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">CDN & Segurança</p>
+                    </div>
+
+                    <!-- Infobip -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-orange-500" onclick="window.openServiceModal('infobip')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Infobip</h3>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Atlassian</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Mensageria & SMS</p>
+                    </div>
+
+                    <!-- Unico -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-orange-500" onclick="window.openServiceModal('unico')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Unico</h3>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Atlassian</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Identidade Digital</p>
+                    </div>
+
+                    <!-- Serasa -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-orange-500" onclick="window.openServiceModal('serasa')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Serasa</h3>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Atlassian</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Antifraude (AllowMe)</p>
+                    </div>
+
+                    <!-- SAP -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-orange-500" onclick="window.openServiceModal('sap')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">SAP for Me</h3>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Atlassian</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">ERP Cloud</p>
+                    </div>
+
+                    <!-- Atlassian -->
+                    <div class="p-4 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer card-hover transition-all border-l-4 border-l-orange-500" onclick="window.openServiceModal('atlassian')">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-slate-800">Atlassian</h3>
+                            <span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Atlassian</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Jira & Confluence</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Código Fonte -->
+            <section id="sourcecode" class="mb-16 scroll-mt-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">Código Fonte Principal</h2>
+                <p class="text-slate-600 mb-4 text-sm">Abaixo está a lógica do nó <strong>"Cérebro Multi-Cloud"</strong>, responsável por identificar o tipo de resposta (XML vs JSON) e normalizar os status.</p>
+                
+                <div class="bg-slate-900 rounded-xl shadow-lg overflow-hidden border border-slate-800">
+                    <div class="flex justify-between items-center px-4 py-2 bg-slate-800 border-b border-slate-700">
+                        <span class="text-xs font-mono text-slate-400">Javascript (ES6)</span>
+                        <button onclick="window.copyToClipboard('main-code-block')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded transition">Copiar</button>
+                    </div>
+                    <pre class="p-4 overflow-x-auto text-xs"><code id="main-code-block" class="language-javascript">
+const originals = $('Lista Geral (Sem AWS)').all();
 const responses = $input.all();
-
-let messageLines = [];
-let hasError = false;
+const results = [];
 
 originals.forEach((original, index) => {
   const name = original.json.name;
-  // Pega dados brutos (string ou json)
-  const rawData = responses[index] ? (responses[index].json.data || responses[index].json) : "";
-  
+  // Busca dados na propriedade de texto definida no nó HTTP
+  const responseItem = responses[index] ? responses[index].json : {};
+  let rawData = responseItem.response_text || responseItem.data || "";
+  if (typeof responseItem === 'string') rawData = responseItem;
+
+  let statusLine = "";
   let indicator = 'unknown';
-  let description = 'Erro de Leitura';
+  let description = "Erro de Leitura";
 
   try {
     let jsonData = null;
-    
-    // Tenta converter para JSON (se não for XML)
-    if (typeof rawData === 'object') {
-        jsonData = rawData;
-    } else if (typeof rawData === 'string') {
-        // Ignora se parecer XML (Azure)
-        if (!rawData.trim().startsWith('<') && !rawData.includes('<?xml')) {
+    let isXML = false;
+
+    // Detecção de Tipo: Se começar com < é XML/HTML, senão tenta JSON
+    if (typeof rawData === 'string') {
+        if (rawData.trim().startsWith('<') || rawData.includes('<?xml') || rawData.includes('<rss')) {
+            isXML = true;
+        } else {
             try { jsonData = JSON.parse(rawData); } catch(e) { jsonData = null; }
         }
+    } else if (typeof rawData === 'object') {
+        jsonData = rawData;
     }
 
-    // 1. LÓGICA GOOGLE (Array)
-    if (Array.isArray(jsonData)) {
-       if (jsonData.length === 0) {
-         indicator = 'none';
-       } else {
-         indicator = 'critical';
-         description = jsonData[0].external_desc || "Incidente Google Cloud";
-       }
-    }
-    // 2. LÓGICA ATLASSIAN / PADRÃO (Cloudflare, Infobip, SAP, Unico, etc.)
-    else if (jsonData && jsonData.status) {
-       indicator = jsonData.status.indicator;
-       description = jsonData.status.description;
-    }
-    // 3. LÓGICA AZURE (XML/RSS - Detecção via String)
-    else if (typeof rawData === 'string' && (rawData.includes('<?xml') || rawData.includes('<rss'))) {
-       // Se tiver a tag <item>, existe um incidente publicado
+    // Lógica de Normalização
+    if (isXML) {
+       // Azure usa RSS Feed. Se houver tags <item>, há incidentes.
        if (rawData.includes('<item>')) {
-         indicator = 'critical';
-         description = "Incidente no Feed Azure";
-       } else {
-         indicator = 'none';
-       }
+         indicator = 'critical'; description = "Incidente Azure";
+       } else { indicator = 'none'; }
+    } else if (jsonData) {
+        if (Array.isArray(jsonData)) {
+           // Google Cloud retorna lista vazia se OK
+           if (jsonData.length === 0) indicator = 'none';
+           else { indicator = 'critical'; description = jsonData[0].external_desc || "Incidente Google"; }
+        } else if (jsonData.status) {
+           // Padrão Atlassian (Cloudflare, etc)
+           indicator = jsonData.status.indicator;
+           description = jsonData.status.description;
+        }
     }
-    // 4. LÓGICA AWS (Inativa / Comentada no Código Fonte)
-    else {
-        description = "Formato desconhecido/vazio";
-    }
+  } catch (e) { description = e.message; }
 
-  } catch (err) {
-    indicator = 'unknown';
-    description = "Erro script: " + err.message;
-  }
-
-  // Formatação Visual
+  // Tradução para Visual
   if (indicator === 'none' || indicator === 'operational') {
-    messageLines.push(`🟢 *${name}:* Operacional`);
+    statusLine = `🟢 *${name}:* Operacional`;
   } else if (indicator === 'unknown') {
-    messageLines.push(`⚪ *${name}:* ${description}`);
+    statusLine = `⚪ *${name}:* ${description}`;
   } else {
-    hasError = true;
-    messageLines.push(`🔴 *${name}:* INSTÁVEL (${description})`);
+    statusLine = `🔴 *${name}:* INSTÁVEL (${description})`;
   }
+
+  results.push({ json: { statusLine, isError: indicator !== 'none' && indicator !== 'operational' } });
 });
 
-// Mensagem Final
-let finalMessage = "☁️ *Monitoramento de Nuvem*\\n\\n";
-finalMessage += messageLines.join('\\n');
+return results;
+                    </code></pre>
+                </div>
+            </section>
 
-if (hasError) {
-  finalMessage += "\\n\\n⚠️ *Atenção:* Instabilidades detectadas.";
-} else {
-  finalMessage += "\\n\\n✅ Infraestrutura de nuvem estável.";
+            <!-- Sustentação -->
+            <section id="sustainment" class="mb-20 scroll-mt-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">Sustentação e Manutenção</h2>
+                
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Adicionar Novo Serviço
+                        </h3>
+                        <ol class="list-decimal list-inside text-sm text-slate-600 space-y-2">
+                            <li>Abra o nó <strong>"Lista Geral"</strong> no n8n.</li>
+                            <li>Adicione um novo objeto ao array JSON.</li>
+                            <li>Se for padrão <strong>Atlassian</strong>, use <code>type: "atlassian"</code>. O script reconhecerá automaticamente.</li>
+                            <li>Se for XML ou formato customizado, validade se o script "Normaliza Geral" precisa de ajuste.</li>
+                        </ol>
+                        <div class="mt-4 bg-slate-50 p-3 rounded border border-slate-200 font-mono text-xs text-slate-600">
+{
+  json: {
+    name: "Novo Serviço",
+    url: "https://status.novoservico.com/api/v2/status.json",
+    type: "atlassian"
+  }
 }
-
-return [{ json: { has_error: hasError, message: finalMessage } }];
-</code></pre>
                         </div>
                     </div>
-                </section>
 
-                <!-- 6. Sustentação -->
-                <section id="sustainment" class="scroll-mt-24 md:scroll-mt-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Sustentação</h2>
                     <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                        <h3 class="font-bold text-slate-800 mb-4">Pontos de Atenção</h3>
+                        <h3 class="font-bold text-slate-800 mb-2">Tratamento de Erros Comuns</h3>
                         <ul class="space-y-3 text-sm text-slate-700">
                             <li class="flex items-start">
-                                <svg class="w-5 h-5 text-amber-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                <span><strong>AWS:</strong> Mantida a lógica no código para reativação futura, mas removida da lista de execução para evitar ruído de alertas falsos.</span>
+                                <span class="font-bold text-red-500 mr-2">⚪ (Cinza):</span>
+                                <span>Erro de leitura ou mudança na API do fornecedor. Verifique se a URL mudou ou se o site está retornando HTML de bloqueio (WAF).</span>
                             </li>
                             <li class="flex items-start">
-                                <svg class="w-5 h-5 text-sky-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span><strong>Expansão:</strong> Serviços novos que usam o padrão Atlassian (como Serasa, SAP, Unico) funcionam automaticamente ao serem adicionados na "Lista Big Techs", pois caem na lógica "Lógica Atlassian" do script.</span>
+                                <span class="font-bold text-red-500 mr-2">Timeout:</span>
+                                <span>Se o fluxo demorar mais de 2 minutos, verifique se algum serviço da lista está fora do ar e travando a conexão. O nó HTTP está configurado com "On Error: Continue" para evitar parada total.</span>
                             </li>
                         </ul>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <!-- Rodapé Copyright -->
-                <footer class="mt-12 pt-6 border-t border-slate-200 text-center">
-                    <p class="text-slate-500 text-sm font-medium">
-                        &copy; 2025 Eric Silva
-                    </p>
-                </footer>
+            <!-- Copyright -->
+            <footer class="mt-12 pt-6 border-t border-slate-200 text-center text-slate-400 text-sm">
+                &copy; 2025 Eric Silva. Todos os direitos reservados.
+            </footer>
 
-            </div>
         </main>
     </div>
 
-    <!-- Modal Detalhes -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden transition-opacity duration-300 backdrop-blur-sm"></div>
-    <div id="modal" class="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4 hidden">
-        <div id="modal-content" class="bg-white w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 translate-y-full md:translate-y-0 md:scale-95 md:opacity-0">
+    <!-- Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/70 z-[60] hidden backdrop-blur-sm transition-opacity"></div>
+    <div id="modal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 hidden">
+        <div id="modal-content" class="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden transform transition-all scale-95 opacity-0 flex flex-col max-h-[85vh]">
             <div class="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50">
-                <h3 id="modal-title" class="text-lg font-bold text-slate-900"></h3>
-                <button id="modal-close" class="p-1 rounded-full hover:bg-slate-200 transition-colors text-slate-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <h3 id="modal-title" class="text-lg font-bold text-slate-800"></h3>
+                <button id="modal-close" class="text-slate-400 hover:text-slate-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
-            <div id="modal-body" class="p-6 text-slate-600 space-y-4 max-h-[70vh] overflow-y-auto"></div>
-            <div class="p-4 border-t border-slate-100 bg-slate-50 md:hidden">
-                <button id="modal-close-btn-bottom" class="w-full bg-slate-200 text-slate-800 font-semibold py-3 rounded-lg">Fechar</button>
+            <div class="p-6 overflow-y-auto">
+                <div id="modal-desc" class="text-slate-600 mb-4 text-sm"></div>
+                <!-- Área de Código/Dados -->
+                <div id="modal-code-container" class="hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase" id="modal-code-label">Código</span>
+                        <span class="text-xs text-slate-400" id="modal-code-type">JavaScript</span>
+                    </div>
+                    <pre class="rounded-lg overflow-hidden text-xs"><code id="modal-code" class="language-javascript"></code></pre>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Dados dos Nós do Fluxograma
+        const nodeData = {
+            trigger: { title: "Trigger (Agendamento)", details: "<p>Dispara o fluxo a cada 15 minutos.</p>", code: null },
+            lista: { title: "Lista Geral (Code)", details: "<p>Array JSON contendo os serviços monitorados (exceto AWS).</p>", code: `return [\n { json: { name: "Azure", url: "...", type: "azure_rss" } },\n { json: { name: "Google", url: "...", type: "google" } },\n ...\n];` },
+            http: { title: "HTTP Request (Geral)", details: "<p>Configurado para retornar <strong>Texto</strong> para evitar falhas de parse com XML.</p>", code: `// Configurações:\n// Response Format: Text\n// User-Agent: Mozilla/5.0 (Browser Mock)` },
+            norm_geral: { title: "Normaliza Geral (Code)", details: "<p>Identifica o formato (XML vs JSON) e extrai o status.</p>", code: `if (rawData.includes("<?xml")) { /* Lógica Azure */ }\nelse if (Array.isArray(jsonData)) { /* Lógica Google */ }\nelse { /* Lógica Atlassian */ }` },
+            mock: { title: "Bypass AWS (Code)", details: "<p>Simula uma resposta da AWS para evitar erros de WAF que paralisam o fluxo.</p>", code: `return { json: { skipped: true, service: "AWS" } };` },
+            norm_aws: { title: "Normaliza AWS (Code)", details: "<p>Gera o status 'Pausado' para o relatório.</p>", code: `return { statusLine: "⚪ *AWS:* Monitoramento Pausado (WAF)" };` },
+            merge: { title: "Merge (Append)", details: "<p>Une as listas de resultados em um único array.</p>", code: null },
+            cerebro: { title: "Gera Relatório Final", details: "<p>Consolida as linhas e define o cabeçalho/rodapé da mensagem.</p>", code: `let message = "☁️ *Relatório*\\n";\nitems.forEach(i => message += i.json.statusLine + "\\n");\nreturn { message };` }
+        };
+
+        // Dados dos Serviços (Endpoint + Explicação)
+        const serviceData = {
+            google: { title: "Google Cloud", details: "<p>Monitora a infraestrutura GCP.</p>", type: "JSON Array", code: `Endpoint: https://status.cloud.google.com/incidents.json\n\nRetorno:\n[\n  {\n    "service_name": "Compute Engine",\n    "external_desc": "Incident description..."\n  }\n]` },
+            azure: { title: "Microsoft Azure", details: "<p>Monitora via Feed RSS oficial da Microsoft.</p>", type: "XML / RSS", code: `Endpoint: https://azure.status.microsoft/pt-br/status/feed/\n\nRetorno:\n<rss version="2.0">\n  <channel>\n    <item>\n      <title>Network Issue</title>\n      ...\n    </item>\n  </channel>\n</rss>` },
+            aws: { title: "Amazon Web Services", details: "<p><strong>Status: Inativo.</strong> O endpoint de dados JSON da Amazon aplica bloqueios severos (WAF/GZIP) a requisições automatizadas.</p>", type: "JSON Legacy", code: `Endpoint: https://status.aws.amazon.com/data.json\n\n(Atualmente bypassado no código para estabilidade)` },
+            cloudflare: { title: "Cloudflare", details: "<p>Padrão Atlassian Statuspage.</p>", type: "JSON Object", code: `Endpoint: https://www.cloudflarestatus.com/api/v2/status.json\n\nRetorno:\n{\n  "status": {\n    "indicator": "none",\n    "description": "All Systems Operational"\n  }\n}` },
+            infobip: { title: "Infobip", details: "<p>Plataforma de mensageria.</p>", type: "JSON Object", code: `Endpoint: https://status.infobip.com/api/v2/status.json` },
+            unico: { title: "Unico", details: "<p>Serviços de identidade digital.</p>", type: "JSON Object", code: `Endpoint: https://status.unico.io/api/v2/status.json` },
+            serasa: { title: "Serasa (AllowMe)", details: "<p>Antifraude e análise de risco.</p>", type: "JSON Object", code: `Endpoint: https://status.allowme.com.br/api/v2/status.json` },
+            sap: { title: "SAP", details: "<p>Serviços ERP Cloud.</p>", type: "JSON Object", code: `Endpoint: https://status.me.sap.com/api/v2/status.json` },
+            atlassian: { title: "Atlassian", details: "<p>Jira, Confluence e Bitbucket.</p>", type: "JSON Object", code: `Endpoint: https://status.atlassian.com/api/v2/status.json` }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.getElementById('menu-btn');
-            const closeMenuBtn = document.getElementById('close-menu-btn');
-            const sidebar = document.getElementById('sidebar');
-            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-            const navLinks = document.querySelectorAll('.nav-link');
-
-            function toggleMenu(show) {
-                if (show) {
-                    sidebar.classList.remove('-translate-x-full');
-                    mobileMenuOverlay.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    sidebar.classList.add('-translate-x-full');
-                    mobileMenuOverlay.classList.add('hidden');
-                    document.body.style.overflow = '';
-                }
-            }
-
-            menuBtn.addEventListener('click', () => toggleMenu(true));
-            closeMenuBtn.addEventListener('click', () => toggleMenu(false));
-            mobileMenuOverlay.addEventListener('click', () => toggleMenu(false));
-            navLinks.forEach(l => l.addEventListener('click', () => { if(window.innerWidth < 768) toggleMenu(false) }));
-
-            // Modal Logic
             const modal = document.getElementById('modal');
             const modalOverlay = document.getElementById('modal-overlay');
             const modalContent = document.getElementById('modal-content');
             const modalTitle = document.getElementById('modal-title');
-            const modalBody = document.getElementById('modal-body');
+            const modalDesc = document.getElementById('modal-desc');
+            const modalCodeContainer = document.getElementById('modal-code-container');
+            const modalCode = document.getElementById('modal-code');
+            const modalCodeType = document.getElementById('modal-code-type');
             const modalCloseBtn = document.getElementById('modal-close');
-            const modalCloseBtnBottom = document.getElementById('modal-close-btn-bottom');
 
-            const nodeData = {
-                trigger: { title: "Nó: Trigger (Agendamento)", details: "<p>Inicia o fluxo a cada 15 minutos.</p>" },
-                lista: { title: "Nó: Lista Big Techs", details: "<p>Define o Array de serviços (Azure, Google, e lista expandida de SaaS). AWS está comentada nesta lista para evitar erros.</p>" },
-                http: { title: "Nó: Baixar Dados (Auto Decode)", details: "<p>Realiza o GET nas URLs. <strong>Configuração Crítica:</strong> 'Response Format' deve ser 'Text'. Isso impede que o n8n tente ler XML como JSON e falhe.</p>" },
-                cerebro: { title: "Nó: Cérebro Multi-Cloud", details: "<p>O coração do fluxo. Detecta se o texto recebido é XML (Azure), JSON Array (Google) ou JSON Object (Padrão Atlassian) e aplica a lógica de extração correta.</p>" },
-                if: { title: "Nó: Teve Erro?", details: "<p>Verifica se a variável <code>has_error</code> é verdadeira.</p>" },
-                alerta: { title: "Nó: Telegram Alerta", details: "<p>Envia mensagem formatada com os incidentes.</p>" },
-                sucesso: { title: "Nó: Telegram Sucesso", details: "<p>Envia mensagem de estabilidade total.</p>" }
-            };
+            window.copyToClipboard = function(elementId) {
+                const text = document.getElementById(elementId).innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("Copiado!");
+                });
+            }
 
-            function openModal(key) {
-                if(!nodeData[key]) return;
-                modalTitle.innerText = nodeData[key].title;
-                modalBody.innerHTML = nodeData[key].details;
+            // Helper function to open modal with common logic
+            function openCommonModal(title, details, code, typeLabel = "JavaScript") {
+                if(!modal || !modalOverlay) return;
+                
+                modalTitle.textContent = title;
+                modalDesc.innerHTML = details;
+                
+                if(code) {
+                    modalCode.textContent = code;
+                    if(modalCodeType) modalCodeType.textContent = typeLabel;
+                    modalCodeContainer.classList.remove('hidden');
+                    Prism.highlightElement(modalCode);
+                } else {
+                    modalCodeContainer.classList.add('hidden');
+                }
+
                 modal.classList.remove('hidden');
                 modalOverlay.classList.remove('hidden');
                 setTimeout(() => {
-                    modalContent.classList.remove('translate-y-full', 'md:scale-95', 'md:opacity-0');
-                    modalContent.classList.add('translate-y-0', 'md:scale-100', 'md:opacity-100');
+                    if(modalContent) {
+                        modalContent.classList.remove('scale-95', 'opacity-0');
+                        modalContent.classList.add('scale-100', 'opacity-100');
+                    }
                 }, 10);
             }
 
+            // Export handlers to window so onclick works
+            window.openModal = function(key) {
+                if(!nodeData[key]) return;
+                openCommonModal(nodeData[key].title, nodeData[key].details, nodeData[key].code, "Lógica do Nó");
+            }
+
+            window.openServiceModal = function(key) {
+                if(!serviceData[key]) return;
+                openCommonModal(serviceData[key].title, serviceData[key].details, serviceData[key].code, "Endpoint / Formato");
+            }
+
             function closeModal() {
-                modalContent.classList.remove('translate-y-0', 'md:scale-100', 'md:opacity-100');
-                modalContent.classList.add('translate-y-full', 'md:scale-95', 'md:opacity-0');
+                if(modalContent) {
+                    modalContent.classList.remove('scale-100', 'opacity-100');
+                    modalContent.classList.add('scale-95', 'opacity-0');
+                }
                 setTimeout(() => {
                     modal.classList.add('hidden');
                     modalOverlay.classList.add('hidden');
-                }, 300);
+                }, 200);
             }
 
+            // Bind events safely
             document.querySelectorAll('.workflow-node').forEach(n => {
-                n.addEventListener('click', () => openModal(n.getAttribute('data-node')));
+                n.addEventListener('click', () => window.openModal(n.getAttribute('data-node')));
             });
 
-            [modalCloseBtn, modalCloseBtnBottom, modalOverlay].forEach(el => el.addEventListener('click', closeModal));
-
-            // Copy Code
-            const copyBtn = document.getElementById('copy-btn');
-            const codeBlock = document.getElementById('code-block');
-            copyBtn.addEventListener('click', () => {
-                const ta = document.createElement('textarea');
-                ta.value = codeBlock.innerText;
-                ta.style.position='fixed'; ta.style.left='-9999px';
-                document.body.appendChild(ta); ta.select();
-                try { document.execCommand('copy'); copyBtn.textContent = "Copiado!"; setTimeout(()=> copyBtn.textContent="Copiar Código", 2000); } catch(e){}
-                document.body.removeChild(ta);
-            });
+            if(modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+            if(modalOverlay) modalOverlay.addEventListener('click', closeModal);
+            
+            // Mobile Menu
+            const menuBtn = document.getElementById('menu-btn');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const mobileOverlay = document.getElementById('mobile-menu-overlay');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            function toggleMenu(show) {
+                if(!sidebar || !mobileOverlay) return;
+                if(show) { 
+                    sidebar.classList.remove('-translate-x-full'); 
+                    mobileOverlay.classList.remove('hidden'); 
+                    document.body.style.overflow = 'hidden'; 
+                } else { 
+                    sidebar.classList.add('-translate-x-full'); 
+                    mobileOverlay.classList.add('hidden'); 
+                    document.body.style.overflow = ''; 
+                }
+            }
+            
+            if(menuBtn) menuBtn.addEventListener('click', () => toggleMenu(true));
+            if(closeMenuBtn) closeMenuBtn.addEventListener('click', () => toggleMenu(false));
+            if(mobileOverlay) mobileOverlay.addEventListener('click', () => toggleMenu(false));
+            navLinks.forEach(l => l.addEventListener('click', () => { if(window.innerWidth < 768) toggleMenu(false) }));
         });
     </script>
 </body>
